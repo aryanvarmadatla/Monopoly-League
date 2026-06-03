@@ -59,6 +59,22 @@
         games   = data.games   || [];
         deletedGames = data.deletedGames || [];
         window._lastSaved = JSON.stringify(data);
+
+        // Run migration — converts any old-format games to new rankings structure
+        const migratedGames = migrateGames(games);
+        const migratedDeleted = migrateGames(deletedGames);
+        const didMigrate = JSON.stringify(migratedGames) !== JSON.stringify(games)
+                        || JSON.stringify(migratedDeleted) !== JSON.stringify(deletedGames);
+
+        if (didMigrate) {
+          games = migratedGames;
+          deletedGames = migratedDeleted;
+          // Save migrated data back to Firebase so it only runs once
+          const payload = { players, games, deletedGames };
+          window._lastSaved = JSON.stringify(payload);
+          await setDoc(DATA_DOC, payload);
+          console.log('Migration saved to Firebase');
+        }
       }
     } catch(e) {
       console.error("Firebase load error:", e);
@@ -450,7 +466,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
         <p id="subtitle">0 players · 0 games played</p>
       </div>
       <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;">
-        Version 6.0
+        Version 6.7
       </div>
       <div class="header-actions">
         <button onclick="openAddPlayer()"><i class="ti ti-plus"></i> Add player</button>
@@ -1444,6 +1460,60 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ── MIGRATE OLD GAME FORMAT ───────────────────────────────
+// Converts legacy games (winners/losers arrays) to new rankings format.
+// Old solo: { winners:['p1'], losers:['p2','p3'] }
+// New solo: { rankings:['p1','p2','p3'] }
+// Old team: { winners:['p1','p2'], losers:['p3','p4'] }
+// New team: { format:'2v2', rankings:[['p1','p2'],['p3','p4']] }
+function migrateGames(gamesList) {
+  let migrated = 0;
+  const result = gamesList.map(g => {
+    // Already in new format
+    if (g.rankings) return g;
+    // Unrecognised — leave as-is
+    if (!g.winners) return g;
+
+    migrated++;
+
+    if (g.type === 'solo') {
+      const rankings = [...(g.winners || []), ...(g.losers || [])];
+      const { winners, losers, ...rest } = g;
+      return { ...rest, rankings };
+    }
+
+    if (g.type === 'team') {
+      const winnerCount = (g.winners || []).length;
+      const loserCount  = (g.losers  || []).length;
+      let fmt = '2v2';
+      if      (winnerCount === 2 && loserCount === 2) fmt = '2v2';
+      else if (winnerCount === 3 && loserCount === 3) fmt = '3v3';
+      else if (winnerCount === 2 && loserCount === 4) fmt = '2v2v2';
+
+      let rankings;
+      if (fmt === '2v2v2') {
+        rankings = [
+          [...(g.winners || [])],
+          (g.losers || []).slice(0, 2),
+          (g.losers || []).slice(2, 4)
+        ];
+      } else {
+        rankings = [[...(g.winners || [])], [...(g.losers || [])]];
+      }
+      const { winners, losers, ...rest } = g;
+      return { ...rest, format: fmt, rankings };
+    }
+
+    return g;
+  });
+
+  if (migrated > 0) {
+    console.log(`Migrated ${migrated} legacy game(s) to new format`);
+    setTimeout(() => showToast(`✓ Migrated ${migrated} old game log${migrated !== 1 ? 's' : ''}`), 500);
+  }
+  return result;
 }
 
 // ── INIT ──────────────────────────────────────────────────
