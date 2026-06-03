@@ -97,6 +97,8 @@
   --relegation: #e53535;
   --amber-bg: #FEF3C7;
   --amber-text: #92400e;
+  --purple-bg: #F3E8FF;
+  --purple-text: #6B21A8;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -121,6 +123,8 @@
     --relegation: #ff4444;
     --amber-bg: #3a2a00;
     --amber-text: #fcd34d;
+    --purple-bg: #2e1a47;
+    --purple-text: #d8b4fe;
   }
 }
 
@@ -132,7 +136,7 @@ body {
   padding: 2rem 1rem 4rem;
 }
 
-.container { max-width: 860px; margin: 0 auto; }
+.container { max-width: 900px; margin: 0 auto; }
 
 .card {
   background: var(--bg);
@@ -147,57 +151,49 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: 12px;
 }
-
-.title-block h1 {
-  font-size: 24px; font-weight: 700; color: var(--text);
-  display: flex; align-items: center; gap: 8px;
-}
-
-.title-block p { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+.title-block h1 { font-size: 24px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.title-block p  { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
 .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 button {
   cursor: pointer; border-radius: var(--radius-md);
   font-size: 13px; padding: 8px 14px;
   border: 0.5px solid var(--border-md);
-  background: transparent; color: var(--text);
-  font-family: inherit;
+  background: transparent; color: var(--text); font-family: inherit;
   transition: background 0.15s, opacity 0.15s, transform 0.1s;
   display: inline-flex; align-items: center; gap: 5px;
 }
-button:hover { background: var(--bg-secondary); }
+button:hover  { background: var(--bg-secondary); }
 button:active { transform: scale(0.97); }
-button.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+button.primary       { background: var(--text); color: var(--bg); border-color: var(--text); }
 button.primary:hover { opacity: 0.82; }
-button.danger { color: var(--red-text); border-color: var(--border); padding: 5px 9px; font-size: 12px; }
-button.danger:hover { background: var(--red-bg); }
-button.restore { color: var(--green-text); border-color: var(--border); padding: 5px 9px; font-size: 12px; }
+button.danger        { color: var(--red-text);   border-color: var(--border); padding: 5px 9px; font-size: 12px; }
+button.danger:hover  { background: var(--red-bg); }
+button.restore       { color: var(--green-text); border-color: var(--border); padding: 5px 9px; font-size: 12px; }
 button.restore:hover { background: var(--green-bg); }
 
 .tabs {
   display: flex; border-bottom: 0.5px solid var(--border);
-  padding: 0 1.5rem; margin-top: 1rem;
-  overflow-x: auto;
+  padding: 0 1.5rem; margin-top: 1rem; overflow-x: auto;
 }
 .tab {
   padding: 9px 14px; font-size: 13px; cursor: pointer;
   color: var(--text-secondary); border: none;
   border-bottom: 2px solid transparent; margin-bottom: -0.5px;
-  background: none; border-radius: 0; font-family: inherit; transition: color 0.15s;
-  white-space: nowrap;
+  background: none; border-radius: 0; font-family: inherit;
+  transition: color 0.15s; white-space: nowrap;
 }
-.tab:hover { background: none; color: var(--text); }
+.tab:hover  { background: none; color: var(--text); }
 .tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
 
 .tab-badge {
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--red-bg); color: var(--red-text);
-  font-size: 10px; font-weight: 700;
-  min-width: 16px; height: 16px; padding: 0 4px;
-  border-radius: 8px; margin-left: 5px; line-height: 1;
+  font-size: 10px; font-weight: 700; min-width: 16px; height: 16px;
+  padding: 0 4px; border-radius: 8px; margin-left: 5px; line-height: 1;
 }
 
-/* TABLE */
+/* ── TABLE ─────────────────────────────────────────────── */
 .table-wrap { padding: 1rem 1.5rem 1.5rem; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 thead tr { border-bottom: 1.5px solid var(--border-md); }
@@ -213,282 +209,233 @@ td.num > .cell-inner { justify-content: center; }
 tbody tr { transition: background 0.2s; }
 tbody tr:hover { background: var(--bg-secondary); }
 
-@keyframes slideDown { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform: translateY(0); } }
-@keyframes slideUp   { from { opacity:0; transform: translateY(8px);  } to { opacity:1; transform: translateY(0); } }
+@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes slideUp   { from { opacity:0; transform:translateY(8px);  } to { opacity:1; transform:translateY(0); } }
 @keyframes fadeIn    { from { opacity:0; } to { opacity:1; } }
+@keyframes spin      { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+
 tr.anim-down { animation: slideDown 0.35s ease forwards; }
 tr.anim-up   { animation: slideUp   0.35s ease forwards; }
-tr.anim-in   { animation: fadeIn    0.4s ease forwards; }
+tr.anim-in   { animation: fadeIn    0.4s  ease forwards; }
 
 tr.relegation-border td > .cell-inner { border-top: 2px solid var(--relegation); }
-tr.relegation-row { background: rgba(229,53,53,0.04); }
+tr.relegation-row       { background: rgba(229,53,53,0.04); }
 tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 
-.pos-wrap { display: flex; align-items: center; justify-content: center; position: relative; width: 32px; }
-.crown { font-size: 22px; line-height:1; }
+.pos-wrap { display:flex; align-items:center; justify-content:center; width:32px; }
+.crown        { font-size:22px; line-height:1; }
 .crown.gold   { filter: drop-shadow(0 1px 3px rgba(200,134,10,0.5)); }
 .crown.silver { filter: drop-shadow(0 1px 2px rgba(120,120,120,0.4)); }
 .crown.bronze { filter: drop-shadow(0 1px 2px rgba(138,61,26,0.4)); }
-.pos-num { font-weight: 600; color: var(--text-secondary); font-size: 14px; }
+.pos-num { font-weight:600; color:var(--text-secondary); font-size:14px; }
 
-.trend { font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 1px; }
-.trend.up   { color: #16a34a; }
-.trend.down { color: var(--relegation); }
-.trend.same { color: var(--text-tertiary); }
+.trend      { font-size:11px; font-weight:600; display:flex; align-items:center; gap:1px; }
+.trend.up   { color:#16a34a; }
+.trend.down { color:var(--relegation); }
+.trend.same { color:var(--text-tertiary); }
 
-.player-name { font-weight: 600; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.player-name { font-weight:600; display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
 .avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; flex-shrink: 0;
-  border: 1.5px solid rgba(0,0,0,0.06);
+  width:32px; height:32px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; flex-shrink:0;
+  border:1.5px solid rgba(0,0,0,0.06);
 }
 .provisional-badge {
-  font-size: 10px; padding: 2px 6px; border-radius: 8px;
-  background: var(--amber-bg); color: var(--amber-text);
-  font-weight: 600; white-space: nowrap;
+  font-size:10px; padding:2px 6px; border-radius:8px;
+  background:var(--amber-bg); color:var(--amber-text); font-weight:600;
 }
 
-.pts { font-weight: 700; font-size: 16px; }
-.pts.leader { color: #0d9260; }
-.stat { font-size: 13px; color: var(--text-secondary); }
-.mrs-score { font-weight: 700; font-size: 14px; color: var(--blue-text); }
+.pts        { font-weight:700; font-size:15px; }
+.pts.leader { color:#0d9260; }
+.stat       { font-size:13px; color:var(--text-secondary); }
+.median-score      { font-weight:700; font-size:14px; color:var(--purple-text); }
+.median-score.top  { color:#0d9260; }
 
-.badge { font-size: 11px; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
-.badge.solo { background: var(--blue-bg); color: var(--blue-text); }
-.badge.team { background: var(--green-bg); color: var(--green-text); }
+.badge      { font-size:11px; padding:2px 7px; border-radius:10px; white-space:nowrap; }
+.badge.solo { background:var(--blue-bg);  color:var(--blue-text);  }
+.badge.team { background:var(--green-bg); color:var(--green-text); }
 
-/* HISTORY */
-.history-section { padding: 0.5rem 1.5rem 1.5rem; }
+/* ── HISTORY / DELETED ─────────────────────────────────── */
+.history-section { padding:0.5rem 1.5rem 1.5rem; }
 .history-item {
-  padding: 11px 0; border-bottom: 0.5px solid var(--border);
-  font-size: 13px; display: flex; justify-content: space-between;
-  align-items: flex-start; gap: 12px;
+  padding:11px 0; border-bottom:0.5px solid var(--border);
+  font-size:13px; display:flex; justify-content:space-between;
+  align-items:flex-start; gap:12px;
 }
-.history-item:last-child { border-bottom: none; }
-.history-winner { font-weight: 600; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.history-rankings { color: var(--text-secondary); font-size: 12px; margin-top: 3px; display: flex; flex-direction: column; gap: 2px; }
-.history-rank-row { display: flex; align-items: center; gap: 5px; }
-.history-date { color: var(--text-tertiary); font-size: 12px; white-space: nowrap; margin-top: 2px; }
-.history-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-.history-actions { display: flex; gap: 6px; }
-.no-history { text-align: center; padding: 3rem; color: var(--text-tertiary); font-size: 13px; }
-.no-history i { font-size: 28px; display: block; margin-bottom: 8px; }
+.history-item:last-child { border-bottom:none; }
+.history-winner   { font-weight:600; margin-bottom:3px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.history-rankings { color:var(--text-secondary); font-size:12px; margin-top:3px; display:flex; flex-direction:column; gap:2px; }
+.history-rank-row { display:flex; align-items:center; gap:5px; }
+.history-date     { color:var(--text-tertiary); font-size:12px; white-space:nowrap; margin-top:2px; }
+.history-meta     { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+.history-actions  { display:flex; gap:6px; }
+.no-history { text-align:center; padding:3rem; color:var(--text-tertiary); font-size:13px; }
+.no-history i { font-size:28px; display:block; margin-bottom:8px; }
 
-/* DELETED */
 .deleted-info {
-  margin: 0.75rem 1.5rem 0;
-  padding: 10px 14px; background: var(--red-bg);
-  border-radius: var(--radius-md); font-size: 12px;
-  color: var(--red-text); display: flex; align-items: center; gap: 8px;
+  margin:0.75rem 1.5rem 0; padding:10px 14px;
+  background:var(--red-bg); border-radius:var(--radius-md);
+  font-size:12px; color:var(--red-text); display:flex; align-items:center; gap:8px;
 }
-.deleted-by { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.deleted-by { font-size:11px; color:var(--text-tertiary); margin-top:2px; }
 
-/* MODALS */
+/* ── MODALS ────────────────────────────────────────────── */
 .modal-bg {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 100; padding: 1rem; animation: fadeIn 0.15s ease;
+  position:fixed; inset:0; background:rgba(0,0,0,0.45);
+  display:flex; align-items:center; justify-content:center;
+  z-index:100; padding:1rem; animation:fadeIn 0.15s ease;
 }
 .modal {
-  background: var(--bg); border-radius: var(--radius-xl);
-  border: 0.5px solid var(--border); padding: 1.5rem;
-  width: 380px; max-width: 100%;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.2);
-  animation: slideDown 0.2s ease;
-  max-height: 90vh; overflow-y: auto;
+  background:var(--bg); border-radius:var(--radius-xl);
+  border:0.5px solid var(--border); padding:1.5rem;
+  width:380px; max-width:100%;
+  box-shadow:0 12px 48px rgba(0,0,0,0.2);
+  animation:slideDown 0.2s ease;
+  max-height:90vh; overflow-y:auto;
 }
-.modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 1rem; }
+.modal h2 { font-size:18px; font-weight:700; margin-bottom:1rem; }
 .modal label {
-  font-size: 11px; font-weight: 600; color: var(--text-secondary);
-  display: block; margin-bottom: 5px; margin-top: 14px;
-  text-transform: uppercase; letter-spacing: 0.05em;
+  font-size:11px; font-weight:600; color:var(--text-secondary);
+  display:block; margin-bottom:5px; margin-top:14px;
+  text-transform:uppercase; letter-spacing:0.05em;
 }
 .modal input, .modal select {
-  width: 100%; padding: 9px 11px;
-  border: 0.5px solid var(--border-md); border-radius: var(--radius-md);
-  background: var(--bg-secondary); color: var(--text);
-  font-size: 14px; font-family: inherit; outline: none;
-  transition: border-color 0.15s;
+  width:100%; padding:9px 11px;
+  border:0.5px solid var(--border-md); border-radius:var(--radius-md);
+  background:var(--bg-secondary); color:var(--text);
+  font-size:14px; font-family:inherit; outline:none; transition:border-color 0.15s;
 }
-.modal input:focus, .modal select:focus { border-color: var(--text); }
-.modal-actions { display: flex; gap: 8px; margin-top: 1.5rem; justify-content: flex-end; }
+.modal input:focus, .modal select:focus { border-color:var(--text); }
+.modal-actions { display:flex; gap:8px; margin-top:1.5rem; justify-content:flex-end; }
 
-/* CHIPS */
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+/* ── CHIPS ─────────────────────────────────────────────── */
+.chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
 .chip {
-  padding: 6px 12px; border-radius: 20px;
-  border: 0.5px solid var(--border-md);
-  font-size: 13px; cursor: pointer;
-  background: transparent; color: var(--text);
-  font-family: inherit; transition: background 0.12s, transform 0.1s;
+  padding:6px 12px; border-radius:20px;
+  border:0.5px solid var(--border-md); font-size:13px; cursor:pointer;
+  background:transparent; color:var(--text); font-family:inherit;
+  transition:background 0.12s, transform 0.1s;
 }
-.chip:hover { background: var(--bg-secondary); }
-.chip:active { transform: scale(0.96); }
-.chip.selected { background: var(--text); color: var(--bg); border-color: var(--text); }
-.chip.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+.chip:hover    { background:var(--bg-secondary); }
+.chip:active   { transform:scale(0.96); }
+.chip.selected { background:var(--text); color:var(--bg); border-color:var(--text); }
+.chip.disabled { opacity:0.35; cursor:not-allowed; pointer-events:none; }
 
-/* RANKING UI */
-.rank-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+/* ── RANK UI ───────────────────────────────────────────── */
+.rank-list { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
 .rank-slot {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 12px; border-radius: var(--radius-md);
-  border: 0.5px solid var(--border-md);
-  background: var(--bg-secondary); font-size: 13px;
+  display:flex; align-items:center; gap:10px; padding:9px 12px;
+  border-radius:var(--radius-md); border:0.5px solid var(--border-md);
+  background:var(--bg-secondary); font-size:13px;
 }
-.rank-slot-pos {
-  font-size: 11px; font-weight: 700; color: var(--text-secondary);
-  min-width: 28px; text-align: center;
-}
-.rank-slot-pos.gold-pos   { color: var(--gold); }
-.rank-slot-pos.silver-pos { color: var(--silver); }
-.rank-slot-pos.bronze-pos { color: var(--bronze); }
-.rank-slot-name { flex: 1; font-weight: 500; color: var(--text-secondary); font-style: italic; }
-.rank-slot-name.filled { color: var(--text); font-style: normal; font-weight: 600; }
-.rank-slot-pts {
-  font-size: 11px; padding: 2px 7px; border-radius: 8px;
-  background: var(--bg-tertiary); color: var(--text-secondary);
-  font-weight: 600; white-space: nowrap;
-}
-.rank-slot-pts.earned { background: var(--green-bg); color: var(--green-text); }
-.rank-slot-remove {
-  font-size: 11px; color: var(--text-tertiary); cursor: pointer;
-  padding: 2px 5px; border-radius: 4px; border: none;
-  background: none; font-family: inherit;
-  transition: background 0.1s, color 0.1s;
-}
-.rank-slot-remove:hover { background: var(--red-bg); color: var(--red-text); }
+.rank-slot-pos        { font-size:11px; font-weight:700; color:var(--text-secondary); min-width:28px; text-align:center; }
+.rank-slot-pos.gold-pos   { color:var(--gold); }
+.rank-slot-pos.silver-pos { color:var(--silver); }
+.rank-slot-pos.bronze-pos { color:var(--bronze); }
+.rank-slot-name        { flex:1; font-weight:500; color:var(--text-secondary); font-style:italic; }
+.rank-slot-name.filled { color:var(--text); font-style:normal; font-weight:600; }
+.rank-slot-pts         { font-size:11px; padding:2px 7px; border-radius:8px; background:var(--bg-tertiary); color:var(--text-secondary); font-weight:600; white-space:nowrap; }
+.rank-slot-pts.earned  { background:var(--green-bg); color:var(--green-text); }
+.rank-slot-pts.zero    { background:var(--red-bg); color:var(--red-text); }
+.rank-slot-remove { font-size:11px; color:var(--text-tertiary); cursor:pointer; padding:2px 5px; border-radius:4px; border:none; background:none; font-family:inherit; transition:background 0.1s, color 0.1s; }
+.rank-slot-remove:hover { background:var(--red-bg); color:var(--red-text); }
 
-.team-block { margin-top: 10px; }
-.team-block-label {
-  font-size: 11px; font-weight: 700; color: var(--text-secondary);
-  text-transform: uppercase; letter-spacing: 0.05em;
-  margin-bottom: 5px; display: flex; align-items: center; gap: 6px;
-}
-.team-rank-badge {
-  font-size: 10px; padding: 1px 6px; border-radius: 6px;
-  background: var(--bg-tertiary); color: var(--text-tertiary); font-weight: 600;
-}
-.team-rank-badge.t1 { background: var(--amber-bg); color: var(--amber-text); }
-.team-rank-badge.t2 { background: var(--blue-bg); color: var(--blue-text); }
-.team-rank-badge.t3 { background: var(--red-bg); color: var(--red-text); }
+.team-block       { margin-top:10px; }
+.team-block-label { font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:5px; display:flex; align-items:center; gap:6px; }
+.team-rank-badge      { font-size:10px; padding:1px 6px; border-radius:6px; background:var(--bg-tertiary); color:var(--text-tertiary); font-weight:600; }
+.team-rank-badge.t1   { background:var(--amber-bg); color:var(--amber-text); }
+.team-rank-badge.t2   { background:var(--blue-bg);  color:var(--blue-text);  }
+.team-rank-badge.t3   { background:var(--red-bg);   color:var(--red-text);   }
 
-.divider { height: 0.5px; background: var(--border); margin: 14px 0; }
 .step-label {
-  font-size: 11px; font-weight: 700; color: var(--text-secondary);
-  text-transform: uppercase; letter-spacing: 0.05em;
-  margin-bottom: 6px; margin-top: 16px;
-  display: flex; align-items: center; gap: 6px;
+  font-size:11px; font-weight:700; color:var(--text-secondary);
+  text-transform:uppercase; letter-spacing:0.05em;
+  margin-bottom:6px; margin-top:16px; display:flex; align-items:center; gap:6px;
 }
 .step-num {
-  width: 18px; height: 18px; border-radius: 50%;
-  background: var(--bg-tertiary); color: var(--text-secondary);
-  font-size: 10px; font-weight: 700;
-  display: inline-flex; align-items: center; justify-content: center;
+  width:18px; height:18px; border-radius:50%;
+  background:var(--bg-tertiary); color:var(--text-secondary);
+  font-size:10px; font-weight:700;
+  display:inline-flex; align-items:center; justify-content:center;
 }
+.pts-note { font-size:11px; color:var(--text-tertiary); margin-top:6px; padding:6px 10px; background:var(--bg-secondary); border-radius:var(--radius-md); }
 
-/* EMPTY */
-.empty-state {
-  text-align: center; padding: 3.5rem 1.5rem;
-  color: var(--text-secondary); font-size: 14px; line-height: 1.8;
-}
-.empty-state i { font-size: 40px; display: block; margin-bottom: 12px; color: var(--text-tertiary); }
+/* ── EMPTY STATE ───────────────────────────────────────── */
+.empty-state { text-align:center; padding:3.5rem 1.5rem; color:var(--text-secondary); font-size:14px; line-height:1.8; }
+.empty-state i { font-size:40px; display:block; margin-bottom:12px; color:var(--text-tertiary); }
 
-/* TOAST */
+/* ── TOAST ─────────────────────────────────────────────── */
 .toast {
-  position: fixed; bottom: 1.5rem; left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--text); color: var(--bg);
-  padding: 10px 18px; border-radius: var(--radius-lg);
-  font-size: 13px; font-weight: 600;
-  opacity: 0; transition: opacity 0.2s, transform 0.2s;
-  z-index: 200; white-space: nowrap; pointer-events: none;
+  position:fixed; bottom:1.5rem; left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--text); color:var(--bg);
+  padding:10px 18px; border-radius:var(--radius-lg);
+  font-size:13px; font-weight:600;
+  opacity:0; transition:opacity 0.2s, transform 0.2s;
+  z-index:200; white-space:nowrap; pointer-events:none;
 }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* ── RULES TAB ─────────────────────────────────────────── */
-.rules-section { padding: 1.25rem 1.5rem 2rem; }
+.rules-section { padding:1.25rem 1.5rem 2rem; }
 
 .rules-hero {
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1.5rem;
-  display: flex; align-items: center; gap: 14px;
+  background:linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  border:0.5px solid var(--border); border-radius:var(--radius-lg);
+  padding:1.25rem 1.5rem; margin-bottom:1.5rem;
+  display:flex; align-items:center; gap:14px;
 }
-.rules-hero-icon { font-size: 36px; line-height: 1; flex-shrink: 0; }
-.rules-hero-text h2 { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
-.rules-hero-text p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.rules-hero-icon { font-size:36px; line-height:1; flex-shrink:0; }
+.rules-hero-text h2 { font-size:16px; font-weight:700; margin-bottom:3px; }
+.rules-hero-text p  { font-size:13px; color:var(--text-secondary); line-height:1.5; }
 
-.rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (max-width: 600px) { .rules-grid { grid-template-columns: 1fr; } }
+.rules-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:600px) { .rules-grid { grid-template-columns:1fr; } }
 
 .rules-card {
-  background: var(--bg-secondary);
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.1rem 1.25rem;
+  background:var(--bg-secondary); border:0.5px solid var(--border);
+  border-radius:var(--radius-lg); padding:1.1rem 1.25rem;
 }
-.rules-card-header {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 10px;
-}
-.rules-card-icon {
-  width: 30px; height: 30px; border-radius: var(--radius-md);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px; flex-shrink: 0;
-}
-.rules-card-title { font-size: 13px; font-weight: 700; }
-.rules-card-subtitle { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+.rules-card.full-width { grid-column:1 / -1; }
+.rules-card-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.rules-card-icon   { width:30px; height:30px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.rules-card-title    { font-size:13px; font-weight:700; }
+.rules-card-subtitle { font-size:11px; color:var(--text-secondary); margin-top:1px; }
 
-.rules-card.full-width { grid-column: 1 / -1; }
+.pts-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:4px; }
+.pts-table th { text-align:left; padding:5px 8px; font-size:10px; font-weight:600; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.04em; border:none; }
+.pts-table td { padding:6px 8px; border-top:0.5px solid var(--border); color:var(--text); }
+.pts-table td:last-child { text-align:right; font-weight:700; }
+.pts-table .place-cell { display:flex; align-items:center; gap:6px; }
+.pts-highlight { color:#0d9260; }
+.pts-zero      { color:var(--text-tertiary); }
 
-/* point table inside rules */
-.pts-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px; }
-.pts-table th {
-  text-align: left; padding: 5px 8px;
-  font-size: 10px; font-weight: 600; color: var(--text-tertiary);
-  text-transform: uppercase; letter-spacing: 0.04em; border: none;
+.ranking-box {
+  background:var(--bg); border:0.5px solid var(--border-md);
+  border-radius:var(--radius-md); padding:10px 14px;
+  font-size:12px; margin-top:8px; line-height:1.9; color:var(--text-secondary);
 }
-.pts-table td { padding: 6px 8px; border-top: 0.5px solid var(--border); color: var(--text); }
-.pts-table td:last-child { text-align: right; font-weight: 700; }
-.pts-table .place-cell { display: flex; align-items: center; gap: 6px; }
-.pts-highlight { color: #0d9260; }
+.ranking-box .rk-primary   { color:var(--purple-text); font-weight:700; font-size:13px; }
+.ranking-box .rk-secondary { color:var(--text-secondary); }
+.ranking-box .rk-label     { color:var(--text); font-weight:600; }
 
-/* MRS formula display */
-.mrs-formula {
-  background: var(--bg);
-  border: 0.5px solid var(--border-md);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  font-size: 12px; margin-top: 8px;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  line-height: 1.9; color: var(--text-secondary);
-}
-.mrs-formula .f-highlight { color: var(--text); font-weight: 600; }
-.mrs-formula .f-op { color: var(--blue-text); }
+.rule-list { list-style:none; display:flex; flex-direction:column; gap:7px; margin-top:4px; }
+.rule-list li { font-size:12px; color:var(--text-secondary); line-height:1.5; display:flex; gap:7px; align-items:flex-start; }
+.rule-list li::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--text-tertiary); flex-shrink:0; margin-top:5px; }
+.rule-list li strong { color:var(--text); }
 
-/* rule list */
-.rule-list { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
-.rule-list li {
-  font-size: 12px; color: var(--text-secondary); line-height: 1.5;
-  display: flex; gap: 7px; align-items: flex-start;
+.rules-section-title {
+  font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.06em; color:var(--text-tertiary);
+  margin:1.5rem 0 0.75rem;
 }
-.rule-list li::before {
-  content: ''; width: 5px; height: 5px; border-radius: 50%;
-  background: var(--text-tertiary); flex-shrink: 0; margin-top: 5px;
-}
-.rule-list li strong { color: var(--text); }
 
 .rules-footer {
-  margin-top: 1.25rem; padding: 10px 14px;
-  background: var(--amber-bg); border-radius: var(--radius-md);
-  font-size: 12px; color: var(--amber-text);
-  display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;
+  margin-top:1.25rem; padding:10px 14px; background:var(--amber-bg);
+  border-radius:var(--radius-md); font-size:12px; color:var(--amber-text);
+  display:flex; align-items:flex-start; gap:8px; line-height:1.5;
 }
-
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -513,7 +460,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
       <button class="tab"        data-tab="rules"   onclick="switchTab('rules')">📋 Rules</button>
     </div>
 
-    <!-- TABLE TAB -->
+    <!-- ── TABLE TAB ─────────────────────────────── -->
     <div id="tab-table">
       <div class="table-wrap">
         <table>
@@ -522,10 +469,11 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
               <th style="width:44px">#</th>
               <th style="width:22px"></th>
               <th>Player</th>
-              <th class="num">Played</th>
-              <th class="num">Pts</th>
+              <th class="num">GP</th>
+              <th class="num">Total Pts</th>
+              <th class="num">Avg PPG</th>
+              <th class="num" title="Median points per game — primary sort">Med PPG ↑</th>
               <th class="num">Win %</th>
-              <th class="num" title="Monopoly Rating Score">MRS ↑</th>
               <th style="width:44px"></th>
             </tr>
           </thead>
@@ -534,21 +482,21 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
       </div>
     </div>
 
-    <!-- HISTORY TAB -->
+    <!-- ── HISTORY TAB ───────────────────────────── -->
     <div id="tab-history" style="display:none">
       <div class="history-section" id="history-list"></div>
     </div>
 
-    <!-- DELETED TAB -->
+    <!-- ── DELETED TAB ───────────────────────────── -->
     <div id="tab-deleted" style="display:none">
       <div class="deleted-info">
         <i class="ti ti-info-circle"></i>
-        Games deleted by anyone in the league are kept here. Use Restore to bring a game back.
+        Games deleted by anyone are kept here. Use Restore to bring a game back.
       </div>
       <div class="history-section" id="deleted-list"></div>
     </div>
 
-    <!-- RULES TAB -->
+    <!-- ── RULES TAB ─────────────────────────────── -->
     <div id="tab-rules" style="display:none">
       <div class="rules-section">
 
@@ -556,82 +504,202 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
           <div class="rules-hero-icon">🎩</div>
           <div class="rules-hero-text">
             <h2>Monopoly League — Official Rules</h2>
-            <p>How points are earned, how players are ranked, and what keeps the league fair. Read before you play.</p>
+            <p>How points are earned, how the table is ranked, and what keeps everything fair. Updated whenever the league admin pushes a change.</p>
           </div>
         </div>
 
+        <div class="rules-section-title">📊 How Rankings Work</div>
         <div class="rules-grid">
 
-          <!-- SOLO POINTS -->
+          <div class="rules-card full-width">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--purple-bg)">📈</div>
+              <div>
+                <div class="rules-card-title">Primary sort: Median Points Per Game (Med PPG)</div>
+                <div class="rules-card-subtitle">Your typical game — not inflated by outliers</div>
+              </div>
+            </div>
+            <div class="ranking-box">
+              <div><span class="rk-label">1st:</span> <span class="rk-primary">Median PPG</span> — the middle value of all your per-game scores. Immune to one huge blowout game inflating your average.</div>
+              <div><span class="rk-label">2nd:</span> <span class="rk-secondary">Total points</span> — tiebreaker only. If two players have the same median, more total points wins.</div>
+              <div><span class="rk-label">3rd:</span> <span class="rk-secondary">Name (alphabetical)</span> — last resort tiebreaker.</div>
+            </div>
+            <ul class="rule-list" style="margin-top:10px">
+              <li><strong>Why median, not average?</strong> A single massive game (e.g. winning a 6-player solo) can inflate a mean average and make a player look better than they really are. Median shows your consistent, typical performance.</li>
+              <li><strong>Why not total points?</strong> Someone who plays 30 games will almost always have more total points than someone with 10 games — even if the 10-game player is clearly better. PPG removes that bias. MLS used PPG for exactly this reason during their 2020 season when teams played different numbers of games.</li>
+              <li><strong>Provisional players</strong> (fewer than 5 games) are ranked below all established players regardless of their Med PPG, since a median of 2–4 games isn't meaningful yet.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="rules-section-title">🏅 Solo Game Points</div>
+        <div class="rules-grid">
+
           <div class="rules-card">
             <div class="rules-card-header">
-              <div class="rules-card-icon" style="background:var(--blue-bg)">🏅</div>
+              <div class="rules-card-icon" style="background:var(--blue-bg)">👤</div>
               <div>
-                <div class="rules-card-title">Solo Game Points</div>
-                <div class="rules-card-subtitle">Every player is ranked by elimination order</div>
+                <div class="rules-card-title">3-player solo</div>
+                <div class="rules-card-subtitle">Top 1 scores · Bottom 2 get 0</div>
               </div>
             </div>
             <table class="pts-table">
               <thead><tr><th>Place</th><th>Points</th></tr></thead>
               <tbody>
-                <tr><td><div class="place-cell">👑 1st place</div></td><td class="pts-highlight">6 pts</td></tr>
-                <tr><td><div class="place-cell">🥈 2nd place</div></td><td>4 pts</td></tr>
-                <tr><td><div class="place-cell">🥉 3rd place</div></td><td>3 pts</td></tr>
-                <tr><td><div class="place-cell">4th place</div></td><td>2 pts</td></tr>
-                <tr><td><div class="place-cell">5th place</div></td><td>1 pt</td></tr>
-                <tr><td><div class="place-cell">6th place</div></td><td>0 pts</td></tr>
+                <tr><td><div class="place-cell">👑 1st</div></td><td class="pts-highlight">4 pts</td></tr>
+                <tr><td><div class="place-cell">2nd</div></td><td class="pts-zero">0 pts</td></tr>
+                <tr><td><div class="place-cell">3rd</div></td><td class="pts-zero">0 pts</td></tr>
               </tbody>
             </table>
           </div>
 
-          <!-- TEAM POINTS -->
           <div class="rules-card">
             <div class="rules-card-header">
-              <div class="rules-card-icon" style="background:var(--green-bg)">🤝</div>
+              <div class="rules-card-icon" style="background:var(--blue-bg)">👥</div>
               <div>
-                <div class="rules-card-title">Team Game Points</div>
-                <div class="rules-card-subtitle">Points split equally between teammates</div>
+                <div class="rules-card-title">4-player solo</div>
+                <div class="rules-card-subtitle">Top 2 score · Bottom 2 get 0</div>
+              </div>
+            </div>
+            <table class="pts-table">
+              <thead><tr><th>Place</th><th>Points</th></tr></thead>
+              <tbody>
+                <tr><td><div class="place-cell">👑 1st</div></td><td class="pts-highlight">5 pts</td></tr>
+                <tr><td><div class="place-cell">🥈 2nd</div></td><td>2 pts</td></tr>
+                <tr><td><div class="place-cell">3rd</div></td><td class="pts-zero">0 pts</td></tr>
+                <tr><td><div class="place-cell">4th</div></td><td class="pts-zero">0 pts</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rules-card">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--blue-bg)">👥</div>
+              <div>
+                <div class="rules-card-title">5-player solo</div>
+                <div class="rules-card-subtitle">Top 3 score · Bottom 2 get 0</div>
+              </div>
+            </div>
+            <table class="pts-table">
+              <thead><tr><th>Place</th><th>Points</th></tr></thead>
+              <tbody>
+                <tr><td><div class="place-cell">👑 1st</div></td><td class="pts-highlight">6 pts</td></tr>
+                <tr><td><div class="place-cell">🥈 2nd</div></td><td>3 pts</td></tr>
+                <tr><td><div class="place-cell">🥉 3rd</div></td><td>1 pt</td></tr>
+                <tr><td><div class="place-cell">4th</div></td><td class="pts-zero">0 pts</td></tr>
+                <tr><td><div class="place-cell">5th</div></td><td class="pts-zero">0 pts</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rules-card">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--blue-bg)">👥</div>
+              <div>
+                <div class="rules-card-title">6-player solo</div>
+                <div class="rules-card-subtitle">Top 3 score · Bottom 3 get 0</div>
+              </div>
+            </div>
+            <table class="pts-table">
+              <thead><tr><th>Place</th><th>Points</th></tr></thead>
+              <tbody>
+                <tr><td><div class="place-cell">👑 1st</div></td><td class="pts-highlight">8 pts</td></tr>
+                <tr><td><div class="place-cell">🥈 2nd</div></td><td>4 pts</td></tr>
+                <tr><td><div class="place-cell">🥉 3rd</div></td><td>2 pts</td></tr>
+                <tr><td><div class="place-cell">4th</div></td><td class="pts-zero">0 pts</td></tr>
+                <tr><td><div class="place-cell">5th</div></td><td class="pts-zero">0 pts</td></tr>
+                <tr><td><div class="place-cell">6th</div></td><td class="pts-zero">0 pts</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rules-card full-width" style="background:var(--bg-tertiary)">
+            <ul class="rule-list">
+              <li><strong>1st place scales with field size</strong> — beating 5 others (8 pts) is meaningfully more rewarded than beating 2 others (4 pts).</li>
+              <li><strong>Only top half scores</strong> — in a 3p game only 1st gets points; in 4–5p games top 2 score; in 6p games top 3 score. No points for finishing in the bottom half.</li>
+              <li><strong>1st place always dominates</strong> — there is a large gap between 1st and 2nd at every field size to preserve the value of winning outright.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="rules-section-title">🤝 Team Game Points</div>
+        <div class="rules-grid">
+
+          <div class="rules-card">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--green-bg)">2️⃣</div>
+              <div>
+                <div class="rules-card-title">2v2 (2 teams of 2)</div>
+                <div class="rules-card-subtitle">Win or nothing</div>
               </div>
             </div>
             <table class="pts-table">
               <thead><tr><th>Finish</th><th>Per player</th></tr></thead>
               <tbody>
-                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">4 pts</td></tr>
-                <tr><td><div class="place-cell">🥈 2nd team</div></td><td>2 pts</td></tr>
-                <tr><td><div class="place-cell">🥉 3rd team</div></td><td>0 pts</td></tr>
+                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">5 pts</td></tr>
+                <tr><td><div class="place-cell">2nd team</div></td><td class="pts-zero">0 pts</td></tr>
               </tbody>
             </table>
-            <ul class="rule-list" style="margin-top:10px">
-              <li>Solo 1st (6pts) is always worth more than Team 1st (4pts) — solo wins are harder.</li>
-              <li>Finishing 2nd solo (4pts) equals winning as a team (4pts).</li>
-            </ul>
           </div>
 
-          <!-- MRS RANKING -->
-          <div class="rules-card full-width">
+          <div class="rules-card">
             <div class="rules-card-header">
-              <div class="rules-card-icon" style="background:var(--blue-bg)">📊</div>
+              <div class="rules-card-icon" style="background:var(--green-bg)">3️⃣</div>
               <div>
-                <div class="rules-card-title">Monopoly Rating Score (MRS)</div>
-                <div class="rules-card-subtitle">The number used to rank players — not raw points</div>
+                <div class="rules-card-title">3v3 (2 teams of 3)</div>
+                <div class="rules-card-subtitle">Win or nothing — bigger coordination challenge</div>
               </div>
             </div>
-            <div class="mrs-formula">
-              <span class="f-highlight">MRS</span> <span class="f-op">=</span>
-              (<span class="f-highlight">adjustedWinRate</span> <span class="f-op">×</span> 100)
-              <span class="f-op">+</span> (<span class="f-highlight">points</span> <span class="f-op">×</span> 0.5)
-              <span class="f-op">+</span> (log(<span class="f-highlight">games + 1</span>) <span class="f-op">×</span> 2)
-              <span class="f-op">+</span> (<span class="f-highlight">soloWins</span> <span class="f-op">×</span> 0.3)
+            <table class="pts-table">
+              <thead><tr><th>Finish</th><th>Per player</th></tr></thead>
+              <tbody>
+                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">6 pts</td></tr>
+                <tr><td><div class="place-cell">2nd team</div></td><td class="pts-zero">0 pts</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rules-card">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--green-bg)">🔺</div>
+              <div>
+                <div class="rules-card-title">2v2v2 (3 teams of 2)</div>
+                <div class="rules-card-subtitle">3-way contest — 2nd place is meaningful</div>
+              </div>
             </div>
-            <ul class="rule-list" style="margin-top:10px">
-              <li><strong>Adjusted win rate</strong> — uses a Bayesian smoothing formula that adds ~5 phantom "average" games to your record. This prevents a player with 1 win from 1 game from claiming a 100% win rate above someone with 8 wins from 10 games.</li>
-              <li><strong>Points factor</strong> — raw points still matter as a secondary signal, rewarding players who consistently score high finishes.</li>
-              <li><strong>Volume bonus</strong> — playing more games helps your MRS, but with logarithmic diminishing returns. Playing 50 games doesn't dominate over someone with 15.</li>
-              <li><strong>Solo win bonus</strong> — a small extra reward for each solo win, since they're harder to achieve than team wins.</li>
+            <table class="pts-table">
+              <thead><tr><th>Finish</th><th>Per player</th></tr></thead>
+              <tbody>
+                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">6 pts</td></tr>
+                <tr><td><div class="place-cell">🥈 2nd team</div></td><td>2 pts</td></tr>
+                <tr><td><div class="place-cell">3rd team</div></td><td class="pts-zero">0 pts</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rules-card" style="background:var(--bg-tertiary)">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--green-bg)">⚖️</div>
+              <div>
+                <div class="rules-card-title">Team vs Solo comparison</div>
+                <div class="rules-card-subtitle">How they stack up</div>
+              </div>
+            </div>
+            <ul class="rule-list">
+              <li>Solo 1st (4–8 pts) is always more than team 1st (5–6 pts) at larger field sizes, since you're winning alone.</li>
+              <li>2-team games are win-or-nothing — 2nd place gets 0 because there's no meaningful "middle" finish with only two teams.</li>
+              <li>3-team (2v2v2) rewards 2nd place because beating one of three teams is a real accomplishment worth acknowledging.</li>
+              <li>3v3 rewards more per player than 2v2 since coordinating 3 people is harder.</li>
             </ul>
           </div>
 
-          <!-- PROVISIONAL -->
+        </div>
+
+        <div class="rules-section-title">⚙️ Other Rules</div>
+        <div class="rules-grid">
+
           <div class="rules-card">
             <div class="rules-card-header">
               <div class="rules-card-icon" style="background:var(--amber-bg)">⚠️</div>
@@ -641,42 +709,40 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
               </div>
             </div>
             <ul class="rule-list">
-              <li>Players with <strong>fewer than 5 games</strong> are marked <span class="provisional-badge">Provisional</span> in the table.</li>
-              <li>They are ranked by the same MRS formula — the Bayesian adjustment naturally keeps outlier win rates in check.</li>
-              <li>The badge disappears automatically once 5 games are logged.</li>
+              <li>Marked <span class="provisional-badge">Provisional</span> in the table.</li>
+              <li>Ranked below all established players regardless of stats — a median of 1–4 games is not a reliable sample.</li>
+              <li>Badge disappears automatically once 5 games are logged.</li>
             </ul>
           </div>
 
-          <!-- RELEGATION -->
           <div class="rules-card">
             <div class="rules-card-header">
               <div class="rules-card-icon" style="background:var(--red-bg)">📉</div>
               <div>
                 <div class="rules-card-title">Relegation Zone</div>
-                <div class="rules-card-subtitle">Applies when 4+ players are in the league</div>
+                <div class="rules-card-subtitle">Bottom 2 when 4+ players in league</div>
               </div>
             </div>
             <ul class="rule-list">
-              <li>The <strong>bottom 2 players</strong> are highlighted in red — this is the relegation zone.</li>
-              <li>It's a visual warning only, not a hard penalty — use it to motivate a comeback.</li>
-              <li>Relegation zone only activates with <strong>4 or more players</strong> in the league.</li>
+              <li>Bottom 2 players highlighted in red when the league has 4 or more established players.</li>
+              <li>Visual warning only — no automatic penalty.</li>
+              <li>Use it as motivation to climb back up.</li>
             </ul>
           </div>
 
-          <!-- GAME LOGGING -->
           <div class="rules-card full-width">
             <div class="rules-card-header">
               <div class="rules-card-icon" style="background:var(--green-bg)">📝</div>
               <div>
-                <div class="rules-card-title">Logging a Game</div>
+                <div class="rules-card-title">Logging Games</div>
                 <div class="rules-card-subtitle">How to record results correctly</div>
               </div>
             </div>
             <ul class="rule-list">
-              <li><strong>Solo games:</strong> Select all players who played, then assign finishing positions in bankruptcy order — 1st is the winner (last standing), last is the first person eliminated.</li>
-              <li><strong>Team games:</strong> Choose the number of teams and players per team, assign players to each team, then rank the teams by finishing order. All teammates share the same points.</li>
-              <li><strong>Everyone must be ranked.</strong> There are no "also played" participants — if you played, you get a finishing position.</li>
-              <li>Games are logged with today's date automatically. Mistakes can be deleted and moved to the <strong>Deleted games</strong> tab where they can be reviewed or restored.</li>
+              <li><strong>Solo games:</strong> Select all players, then assign finishing positions in order — 1st is the last player standing, last is the first eliminated.</li>
+              <li><strong>Team games:</strong> Choose the format (2v2, 3v3, 2v2v2), assign players to teams, then rank the teams. All teammates share the same points per the table above.</li>
+              <li><strong>Everyone must be ranked.</strong> No unranked participants — if you played, you get a position.</li>
+              <li><strong>Mistakes?</strong> Delete the game log — it moves to the Deleted games tab where anyone can view it and restore it if needed.</li>
             </ul>
           </div>
 
@@ -684,7 +750,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 
         <div class="rules-footer">
           <i class="ti ti-pencil" style="margin-top:1px;flex-shrink:0"></i>
-          <span>Rules are maintained by the league admin. If you think something needs changing, reach out — don't edit game logs to work around the system.</span>
+          <span>Rules are maintained by the league admin. If you think something should change, reach out — don't manipulate game logs to work around the system.</span>
         </div>
 
       </div>
@@ -714,34 +780,21 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
     <div class="modal" style="width:460px" onclick="event.stopPropagation()">
       <h2>Log game result</h2>
 
-      <!-- Step 1: game type -->
       <div class="step-label"><span class="step-num">1</span> Game type</div>
       <select id="log-type" onchange="updateLogUI()">
         <option value="solo">Solo game</option>
         <option value="team">Team game</option>
       </select>
 
-      <!-- team config (only team) -->
       <div id="team-config" style="display:none">
-        <div style="display:flex;gap:10px;margin-top:10px">
-          <div style="flex:1">
-            <label>Number of teams</label>
-            <select id="num-teams" onchange="updateLogUI()">
-              <option value="2">2 teams</option>
-              <option value="3">3 teams</option>
-            </select>
-          </div>
-          <div style="flex:1">
-            <label>Players per team</label>
-            <select id="team-size" onchange="updateLogUI()">
-              <option value="2">2 players</option>
-              <option value="3">3 players</option>
-            </select>
-          </div>
-        </div>
+        <div class="step-label" style="margin-top:10px"><span class="step-num">1b</span> Team format</div>
+        <select id="team-format" onchange="updateLogUI()">
+          <option value="2v2">2v2 — 2 teams of 2 players</option>
+          <option value="3v3">3v3 — 2 teams of 3 players</option>
+          <option value="2v2v2">2v2v2 — 3 teams of 2 players</option>
+        </select>
       </div>
 
-      <!-- Step 2: select players / assign teams -->
       <div id="step2-solo">
         <div class="step-label"><span class="step-num">2</span> Who played?</div>
         <div class="chips" id="player-chips"></div>
@@ -752,14 +805,14 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
         <div id="team-assign-ui"></div>
       </div>
 
-      <!-- Step 3: rank -->
       <div id="step3-solo">
-        <div class="step-label"><span class="step-num">3</span> Rank finishing positions <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-tertiary)">(1st = last standing)</span></div>
+        <div class="step-label"><span class="step-num">3</span> Finishing order <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-tertiary)">(1st = last standing)</span></div>
         <div class="rank-list" id="solo-rank-list"></div>
+        <div class="pts-note" id="solo-pts-note"></div>
       </div>
 
       <div id="step3-team" style="display:none">
-        <div class="step-label"><span class="step-num">3</span> Rank teams <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-tertiary)">(drag or click to assign)</span></div>
+        <div class="step-label"><span class="step-num">3</span> Team finishing order <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-tertiary)">(use ↑ to reorder)</span></div>
         <div class="rank-list" id="team-rank-list"></div>
       </div>
 
@@ -790,10 +843,8 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
   <div class="modal-bg" onclick="closeModals()">
     <div class="modal" onclick="event.stopPropagation()">
       <h2>Delete game log?</h2>
-      <p style="font-size:14px;color:var(--text-secondary);margin-top:4px;line-height:1.6">
-        This game will be moved to <strong>Deleted games</strong>. Anyone can view it there and restore it if needed.
-      </p>
-      <label>Your name <span style="font-weight:400;text-transform:none;letter-spacing:0">(so others know who deleted it)</span></label>
+      <p style="font-size:14px;color:var(--text-secondary);margin-top:4px;line-height:1.6">Moved to <strong>Deleted games</strong> — anyone can view and restore it there.</p>
+      <label>Your name</label>
       <input type="text" id="deleter-name" placeholder="e.g. Alex" onkeydown="if(event.key==='Enter')confirmDeleteGame()" />
       <div class="modal-actions">
         <button onclick="closeModals()">Cancel</button>
@@ -806,14 +857,23 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 <div class="toast" id="toast"></div>
 
 <script>
-// ── POINT TABLES ─────────────────────────────────────────────────────────────
-const SOLO_PTS  = [6, 4, 3, 2, 1, 0]; // index 0 = 1st place
-const TEAM_PTS  = [4, 2, 0];           // index 0 = 1st team
+// ── POINT TABLES ─────────────────────────────────────────
+// Solo: keyed by player count. Index = finish position (0-based). 0 = not scored.
+const SOLO_PTS_BY_COUNT = {
+  3: [4, 0, 0],
+  4: [5, 2, 0, 0],
+  5: [6, 3, 1, 0, 0],
+  6: [8, 4, 2, 0, 0, 0]
+};
 
-// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+// Team: keyed by format string
+const TEAM_PTS_BY_FORMAT = {
+  '2v2':   [5, 0],
+  '3v3':   [6, 0],
+  '2v2v2': [6, 2, 0]
+};
+
 const PROVISIONAL_THRESHOLD = 5;
-const BAYESIAN_K = 5;        // phantom games for win rate smoothing
-const AVG_WIN_RATE = 0.30;   // assumed league average win rate for Bayesian prior
 
 const AVATAR_COLORS = [
   ['#DBEAFE','#1e40af'],['#D1FAE5','#065f46'],['#FEF3C7','#92400e'],
@@ -822,128 +882,173 @@ const AVATAR_COLORS = [
   ['#EFF6FF','#1e3a8a'],['#FDF4FF','#581c87'],['#FFF1F2','#881337']
 ];
 
-let players = [];
-let games = [];
+let players      = [];
+let games        = [];
 let deletedGames = [];
-let removeTarget = null;
-let deleteGameTarget = null;
-let prevRanks = {};
+let removeTarget      = null;
+let deleteGameTarget  = null;
+let prevRanks         = {};
 
-// log game state
-let logSelectedPlayers = []; // solo: ordered array of player ids (index = rank)
-let teamAssignments = [];    // team: array of arrays [[pid,pid],[pid,pid]]
-let teamRankOrder = [];      // team: [0,1,2] = team indices in finishing order
+// Log game state
+let logSelectedPlayers = [];
+let teamAssignments    = [];
+let teamRankOrder      = [];
 
-// ── SAVE / LOAD ───────────────────────────────────────────────────────────────
+// ── SAVE ─────────────────────────────────────────────────
 function save() {
   const payload = { players, games, deletedGames };
   window._lastSaved = JSON.stringify(payload);
   if (window._fbSave) window._fbSave(players, games, deletedGames);
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
+// ── HELPERS ──────────────────────────────────────────────
 function getInitials(name) {
-  return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  return name.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function median(arr) {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 !== 0 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+function getPtsForGame(g, pid) {
+  if (!g.rankings) return null;
+  if (g.type === 'solo') {
+    const table = SOLO_PTS_BY_COUNT[g.rankings.length] || [];
+    const rank  = g.rankings.indexOf(pid);
+    return rank === -1 ? null : (table[rank] ?? 0);
+  } else {
+    const table  = TEAM_PTS_BY_FORMAT[g.format] || [];
+    const rank   = g.rankings.findIndex(team => Array.isArray(team) ? team.includes(pid) : false);
+    return rank === -1 ? null : (table[rank] ?? 0);
+  }
 }
 
 function getStats(pid) {
-  let gp=0, pts=0, wins=0, soloWins=0;
+  const perGamePts = [];
+  let totalPts = 0, wins = 0;
+
   for (const g of games) {
-    const rank = g.rankings ? g.rankings.findIndex(r => Array.isArray(r) ? r.includes(pid) : r === pid) : -1;
-    const inGame = rank !== -1;
-    if (!inGame) continue;
-    gp++;
+    const pts = getPtsForGame(g, pid);
+    if (pts === null) continue;
+    perGamePts.push(pts);
+    totalPts += pts;
+    // win = finished 1st (ranked index 0)
     if (g.type === 'solo') {
-      const p = SOLO_PTS[rank] ?? 0;
-      pts += p;
-      if (rank === 0) { wins++; soloWins++; }
+      if (g.rankings[0] === pid) wins++;
     } else {
-      const p = TEAM_PTS[rank] ?? 0;
-      pts += p;
-      if (rank === 0) wins++;
+      const t = g.rankings[0];
+      if (Array.isArray(t) && t.includes(pid)) wins++;
     }
   }
-  const rawWinRate = gp > 0 ? wins / gp : 0;
-  const adjustedWinRate = (wins + BAYESIAN_K * AVG_WIN_RATE) / (gp + BAYESIAN_K);
-  const mrs = computeMRS(adjustedWinRate, pts, gp, soloWins);
-  return { gp, pts, wins, soloWins, rawWinRate, adjustedWinRate, mrs };
-}
 
-function computeMRS(adjWR, pts, gp, soloWins) {
-  return (adjWR * 100) + (pts * 0.5) + (Math.log(gp + 1) * 2) + (soloWins * 0.3);
+  const gp      = perGamePts.length;
+  const avgPPG  = gp > 0 ? totalPts / gp : 0;
+  const medPPG  = median(perGamePts);
+  const winPct  = gp > 0 ? Math.round((wins / gp) * 100) : null;
+
+  return { gp, totalPts, avgPPG, medPPG, winPct, wins };
 }
 
 function getRanked() {
-  return players
-    .map(p => ({ ...p, ...getStats(p.id) }))
-    .sort((a, b) => {
-      if (a.gp === 0 && b.gp === 0) return a.name.localeCompare(b.name);
-      if (a.gp === 0) return 1;
-      if (b.gp === 0) return -1;
-      return b.mrs - a.mrs || a.name.localeCompare(b.name);
-    });
+  const all = players.map(p => ({ ...p, ...getStats(p.id) }));
+  const established  = all.filter(p => p.gp >= PROVISIONAL_THRESHOLD);
+  const provisional  = all.filter(p => p.gp > 0 && p.gp < PROVISIONAL_THRESHOLD);
+  const unplayed     = all.filter(p => p.gp === 0);
+
+  const sortFn = (a, b) =>
+    b.medPPG - a.medPPG || b.totalPts - a.totalPts || a.name.localeCompare(b.name);
+
+  established.sort(sortFn);
+  provisional.sort(sortFn);
+  unplayed.sort((a, b) => a.name.localeCompare(b.name));
+
+  return [...established, ...provisional, ...unplayed];
 }
 
-// ── BADGE ─────────────────────────────────────────────────────────────────────
+// ── BADGE ─────────────────────────────────────────────────
 function updateDeletedBadge() {
   const badge = document.getElementById('deleted-badge');
   if (deletedGames.length > 0) {
-    badge.textContent = deletedGames.length;
+    badge.textContent  = deletedGames.length;
     badge.style.display = '';
   } else {
     badge.style.display = 'none';
   }
 }
 
-// ── RENDER TABLE ──────────────────────────────────────────────────────────────
+// ── RENDER TABLE ──────────────────────────────────────────
 function renderTable() {
   const body = document.getElementById('leaderboard-body');
   updateDeletedBadge();
 
   if (!players.length) {
-    body.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="ti ti-users"></i>No players yet.<br>Hit "Add player" to get started.</div></td></tr>`;
+    body.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="ti ti-users"></i>No players yet.<br>Hit "Add player" to get started.</div></td></tr>`;
     document.getElementById('subtitle').textContent = '0 players · 0 games played';
     prevRanks = {};
     return;
   }
 
   const ranked = getRanked();
-  const total = ranked.length;
-  const relegZone = total >= 4 ? 2 : 0;
-  const relegStartPos = total - relegZone + 1;
+  const total  = ranked.length;
+  // relegation only counts established players
+  const estCount   = ranked.filter(p => p.gp >= PROVISIONAL_THRESHOLD).length;
+  const relegZone  = estCount >= 4 ? 2 : 0;
+  const relegStart = estCount - relegZone + 1; // position among established
 
   document.getElementById('subtitle').textContent =
-    `${total} player${total!==1?'s':''} · ${games.length} game${games.length!==1?'s':''} played`;
+    `${total} player${total !== 1 ? 's' : ''} · ${games.length} game${games.length !== 1 ? 's' : ''} played`;
 
   let html = '';
-  ranked.forEach((p, i) => {
-    const pos = i + 1;
-    const prev = prevRanks[p.id];
-    let animClass = prev === undefined ? ' anim-in' : pos < prev ? ' anim-down' : pos > prev ? ' anim-up' : '';
+  let estPos = 0; // counter only among established players
 
+  ranked.forEach((p, i) => {
+    const globalPos = i + 1;
+    const prev      = prevRanks[p.id];
+    const isProvisional = p.gp > 0 && p.gp < PROVISIONAL_THRESHOLD;
+    const isUnplayed    = p.gp === 0;
+    const isEstablished = !isProvisional && !isUnplayed;
+
+    if (isEstablished) estPos++;
+
+    let animClass = prev === undefined ? ' anim-in'
+                  : globalPos < prev   ? ' anim-down'
+                  : globalPos > prev   ? ' anim-up'
+                  : '';
+
+    // trend
     let trendHtml = '';
     if (prev !== undefined) {
-      const diff = prev - pos;
-      if (diff > 0) trendHtml = `<span class="trend up"><i class="ti ti-arrow-up" style="font-size:12px"></i>${diff}</span>`;
+      const diff = prev - globalPos;
+      if      (diff > 0) trendHtml = `<span class="trend up"><i class="ti ti-arrow-up" style="font-size:12px"></i>${diff}</span>`;
       else if (diff < 0) trendHtml = `<span class="trend down"><i class="ti ti-arrow-down" style="font-size:12px"></i>${Math.abs(diff)}</span>`;
-      else trendHtml = `<span class="trend same">—</span>`;
+      else               trendHtml = `<span class="trend same">—</span>`;
     }
 
+    // position display
     let posHtml = '';
-    if (pos===1) posHtml=`<span class="crown gold">👑</span>`;
-    else if (pos===2) posHtml=`<span class="crown silver" style="font-size:17px">🥈</span>`;
-    else if (pos===3) posHtml=`<span class="crown bronze" style="font-size:17px">🥉</span>`;
-    else posHtml=`<span class="pos-num">${pos}</span>`;
+    if      (globalPos === 1) posHtml = `<span class="crown gold">👑</span>`;
+    else if (globalPos === 2) posHtml = `<span class="crown silver" style="font-size:17px">🥈</span>`;
+    else if (globalPos === 3) posHtml = `<span class="crown bronze" style="font-size:17px">🥉</span>`;
+    else                      posHtml = `<span class="pos-num">${globalPos}</span>`;
 
     const [bg, fg] = AVATAR_COLORS[p.colorIdx % AVATAR_COLORS.length];
-    const isProvisional = p.gp < PROVISIONAL_THRESHOLD && p.gp > 0;
-    const isRelegBorder = relegZone > 0 && pos === relegStartPos;
-    const isRelegRow    = relegZone > 0 && pos >= relegStartPos;
+
+    // relegation (only for established players)
+    const isRelegBorder = relegZone > 0 && isEstablished && estPos === relegStart;
+    const isRelegRow    = relegZone > 0 && isEstablished && estPos >= relegStart;
     let rowClass = animClass + (isRelegRow ? ' relegation-row' : '');
     const ci = isRelegBorder ? ' relegation-border' : '';
 
-    const winPctDisplay = p.gp > 0 ? `${Math.round(p.rawWinRate * 100)}%` : '—';
-    const mrsDisplay = p.gp > 0 ? p.mrs.toFixed(1) : '—';
+    const isLeader = globalPos === 1 && p.totalPts > 0 && isEstablished;
+
+    // stat display
+    const medDisplay  = p.gp > 0 ? p.medPPG.toFixed(1) : '—';
+    const avgDisplay  = p.gp > 0 ? p.avgPPG.toFixed(1) : '—';
+    const winDisplay  = p.winPct !== null ? `${p.winPct}%` : '—';
+    const medClass    = isLeader ? 'median-score top' : 'median-score';
 
     html += `<tr class="${rowClass.trim()}">
       <td><div class="cell-inner${ci}"><div class="pos-wrap">${posHtml}</div></div></td>
@@ -952,14 +1057,15 @@ function renderTable() {
         <span class="player-name">
           <span class="avatar" style="background:${bg};color:${fg}">${getInitials(p.name)}</span>
           ${p.name}
-          ${pos===1&&p.pts>0?'<span style="font-size:11px;background:#fef9ec;color:#92400e;padding:2px 7px;border-radius:10px;font-weight:600">Leader</span>':''}
-          ${isProvisional?'<span class="provisional-badge">Provisional</span>':''}
+          ${isLeader ? '<span style="font-size:11px;background:#fef9ec;color:#92400e;padding:2px 7px;border-radius:10px;font-weight:600">Leader</span>' : ''}
+          ${isProvisional ? '<span class="provisional-badge">Provisional</span>' : ''}
         </span>
       </div></td>
       <td class="num"><div class="cell-inner${ci}"><span class="stat">${p.gp}</span></div></td>
-      <td class="num"><div class="cell-inner${ci}"><span class="pts${pos===1&&p.pts>0?' leader':''}">${p.pts}</span></div></td>
-      <td class="num"><div class="cell-inner${ci}"><span class="stat">${winPctDisplay}</span></div></td>
-      <td class="num"><div class="cell-inner${ci}"><span class="mrs-score">${mrsDisplay}</span></div></td>
+      <td class="num"><div class="cell-inner${ci}"><span class="pts${isLeader?' leader':''}">${p.totalPts}</span></div></td>
+      <td class="num"><div class="cell-inner${ci}"><span class="stat">${avgDisplay}</span></div></td>
+      <td class="num"><div class="cell-inner${ci}"><span class="${medClass}">${medDisplay}</span></div></td>
+      <td class="num"><div class="cell-inner${ci}"><span class="stat">${winDisplay}</span></div></td>
       <td class="num"><div class="cell-inner${ci}">
         <button class="danger" onclick="openRemove('${p.id}','${p.name.replace(/'/g,"\\'")}')"><i class="ti ti-trash"></i></button>
       </div></td>
@@ -969,137 +1075,118 @@ function renderTable() {
   body.innerHTML = html;
   ranked.forEach((p, i) => { prevRanks[p.id] = i + 1; });
 
+  // relegation legend
   const existing = document.getElementById('rel-legend');
   if (existing) existing.remove();
   if (relegZone > 0) {
     const wrap = document.querySelector('.table-wrap');
-    const leg = document.createElement('div');
-    leg.id = 'rel-legend';
+    const leg  = document.createElement('div');
+    leg.id     = 'rel-legend';
     leg.innerHTML = `<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--relegation);padding:8px 0 0;font-weight:500;opacity:0.8">
       <span style="display:inline-block;width:16px;height:2px;background:var(--relegation);border-radius:1px"></span>
-      Relegation zone — bottom ${relegZone}
+      Relegation zone — bottom ${relegZone} established players
     </div>`;
     wrap.appendChild(leg);
   }
 }
 
-// ── RENDER HISTORY ────────────────────────────────────────────────────────────
+// ── RENDER HISTORY ────────────────────────────────────────
 function placeEmoji(i) { return ['👑','🥈','🥉','4️⃣','5️⃣','6️⃣'][i] || `${i+1}.`; }
+
+function renderGameItem(g, showDelete) {
+  const badge = g.type === 'solo'
+    ? `<span class="badge solo">Solo</span>`
+    : `<span class="badge team">${g.format || 'Team'}</span>`;
+
+  let rankingsHtml = '';
+  if (g.rankings && g.rankings.length) {
+    const ptsTable = g.type === 'solo'
+      ? (SOLO_PTS_BY_COUNT[g.rankings.length] || [])
+      : (TEAM_PTS_BY_FORMAT[g.format] || []);
+
+    rankingsHtml = '<div class="history-rankings">';
+    g.rankings.forEach((slot, i) => {
+      const names = Array.isArray(slot)
+        ? slot.map(id => players.find(p => p.id === id)?.name || '?').join(' & ')
+        : (players.find(p => p.id === slot)?.name || '?');
+      const pts = ptsTable[i] ?? 0;
+      const ptsStr = pts > 0 ? `+${pts}pt${pts !== 1 ? 's' : ''}` : '0 pts';
+      rankingsHtml += `<div class="history-rank-row">${placeEmoji(i)} ${names} <span style="color:var(--text-tertiary);font-size:11px">${ptsStr}</span></div>`;
+    });
+    rankingsHtml += '</div>';
+  }
+
+  const actionBtn = showDelete
+    ? `<button class="danger" onclick="openDeleteGame('${g.id}')" title="Delete"><i class="ti ti-trash"></i></button>`
+    : `<button class="restore" onclick="restoreGame('${g.id}')"><i class="ti ti-arrow-back-up"></i> Restore</button>`;
+
+  const deletedByHtml = g.deletedBy
+    ? `<div class="deleted-by"><i class="ti ti-trash" style="font-size:10px"></i> Deleted by ${g.deletedBy}${g.deletedAt ? ' · ' + g.deletedAt : ''}</div>`
+    : '';
+
+  return `<div class="history-item">
+    <div>
+      <div class="history-winner${!showDelete?' style="opacity:0.6"':''}">${badge} ${g.date}</div>
+      ${rankingsHtml}
+      ${deletedByHtml}
+    </div>
+    <div class="history-meta">
+      <div class="history-actions">${actionBtn}</div>
+    </div>
+  </div>`;
+}
 
 function renderHistory() {
   const el = document.getElementById('history-list');
   if (!games.length) { el.innerHTML = '<div class="no-history"><i class="ti ti-history"></i>No games logged yet.</div>'; return; }
-  const sorted = [...games].reverse();
-  let html = '';
-  sorted.forEach(g => {
-    const badge = g.type==='solo'
-      ? `<span class="badge solo">Solo</span>`
-      : `<span class="badge team">Team</span>`;
-    let rankingsHtml = '';
-    if (g.rankings && g.rankings.length) {
-      rankingsHtml = '<div class="history-rankings">';
-      g.rankings.forEach((slot, i) => {
-        const names = Array.isArray(slot)
-          ? slot.map(id => players.find(p=>p.id===id)?.name || '?').join(' & ')
-          : (players.find(p=>p.id===slot)?.name || '?');
-        const pts = g.type === 'solo' ? (SOLO_PTS[i] ?? 0) : (TEAM_PTS[i] ?? 0);
-        rankingsHtml += `<div class="history-rank-row">${placeEmoji(i)} ${names} <span style="color:var(--text-tertiary);font-size:11px">+${pts}pt${pts!==1?'s':''}</span></div>`;
-      });
-      rankingsHtml += '</div>';
-    }
-    html += `<div class="history-item">
-      <div>
-        <div class="history-winner">${badge} ${g.date}</div>
-        ${rankingsHtml}
-      </div>
-      <div class="history-meta">
-        <div class="history-actions">
-          <button class="danger" onclick="openDeleteGame('${g.id}')" title="Delete game"><i class="ti ti-trash"></i></button>
-        </div>
-      </div>
-    </div>`;
-  });
-  el.innerHTML = html;
+  el.innerHTML = [...games].reverse().map(g => renderGameItem(g, true)).join('');
 }
 
-// ── RENDER DELETED ────────────────────────────────────────────────────────────
 function renderDeleted() {
   const el = document.getElementById('deleted-list');
   updateDeletedBadge();
   if (!deletedGames.length) { el.innerHTML = '<div class="no-history"><i class="ti ti-circle-check"></i>No deleted games — everything looks clean.</div>'; return; }
-  const sorted = [...deletedGames].reverse();
-  let html = '';
-  sorted.forEach(g => {
-    const badge = g.type==='solo'
-      ? `<span class="badge solo">Solo</span>`
-      : `<span class="badge team">Team</span>`;
-    let rankingsHtml = '';
-    if (g.rankings && g.rankings.length) {
-      rankingsHtml = '<div class="history-rankings" style="opacity:0.6">';
-      g.rankings.forEach((slot, i) => {
-        const names = Array.isArray(slot)
-          ? slot.map(id => players.find(p=>p.id===id)?.name || '?').join(' & ')
-          : (players.find(p=>p.id===slot)?.name || '?');
-        rankingsHtml += `<div class="history-rank-row">${placeEmoji(i)} ${names}</div>`;
-      });
-      rankingsHtml += '</div>';
-    }
-    const deletedBy = g.deletedBy ? `Deleted by ${g.deletedBy}` : 'Deleted';
-    const deletedAt = g.deletedAt ? ` · ${g.deletedAt}` : '';
-    html += `<div class="history-item">
-      <div>
-        <div class="history-winner" style="opacity:0.6">${badge} ${g.date}</div>
-        ${rankingsHtml}
-        <div class="deleted-by"><i class="ti ti-trash" style="font-size:10px"></i> ${deletedBy}${deletedAt}</div>
-      </div>
-      <div class="history-meta">
-        <button class="restore" onclick="restoreGame('${g.id}')"><i class="ti ti-arrow-back-up"></i> Restore</button>
-      </div>
-    </div>`;
-  });
-  el.innerHTML = html;
+  el.innerHTML = [...deletedGames].reverse().map(g => renderGameItem(g, false)).join('');
 }
 
-// ── SWITCH TAB ────────────────────────────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   ['table','history','deleted','rules'].forEach(t => {
-    document.getElementById('tab-'+t).style.display = t===tab ? '' : 'none';
+    document.getElementById('tab-' + t).style.display = t === tab ? '' : 'none';
   });
-  if (tab==='history') renderHistory();
-  if (tab==='deleted') renderDeleted();
+  if (tab === 'history') renderHistory();
+  if (tab === 'deleted') renderDeleted();
 }
 
-// ── ADD PLAYER ────────────────────────────────────────────────────────────────
+// ── ADD PLAYER ────────────────────────────────────────────
 function openAddPlayer() {
-  document.getElementById('new-player-name').value='';
-  document.getElementById('modal-add').style.display='';
-  setTimeout(()=>document.getElementById('new-player-name').focus(),50);
+  document.getElementById('new-player-name').value = '';
+  document.getElementById('modal-add').style.display = '';
+  setTimeout(() => document.getElementById('new-player-name').focus(), 50);
 }
-
 function confirmAddPlayer() {
   const name = document.getElementById('new-player-name').value.trim();
   if (!name) return;
-  if (players.find(p=>p.name.toLowerCase()===name.toLowerCase())) { showToast('That name already exists'); return; }
-  players.push({id:'p'+Date.now(), name, colorIdx: players.length});
+  if (players.find(p => p.name.toLowerCase() === name.toLowerCase())) { showToast('That name already exists'); return; }
+  players.push({ id: 'p' + Date.now(), name, colorIdx: players.length });
   save(); closeModals(); renderTable();
   showToast(`${name} added to the league!`);
 }
 
-// ── REMOVE PLAYER ─────────────────────────────────────────────────────────────
+// ── REMOVE PLAYER ─────────────────────────────────────────
 function openRemove(id, name) {
   removeTarget = id;
   document.getElementById('remove-name').textContent = name;
-  document.getElementById('modal-remove').style.display='';
+  document.getElementById('modal-remove').style.display = '';
 }
-
 function confirmRemovePlayer() {
   if (!removeTarget) return;
-  const p = players.find(x=>x.id===removeTarget);
-  players = players.filter(x=>x.id!==removeTarget);
+  const p = players.find(x => x.id === removeTarget);
+  players = players.filter(x => x.id !== removeTarget);
   games = games.filter(g => {
     if (!g.rankings) return true;
-    return !g.rankings.some(slot => Array.isArray(slot) ? slot.includes(removeTarget) : slot===removeTarget);
+    return !g.rankings.some(slot => Array.isArray(slot) ? slot.includes(removeTarget) : slot === removeTarget);
   });
   delete prevRanks[removeTarget];
   removeTarget = null;
@@ -1107,80 +1194,104 @@ function confirmRemovePlayer() {
   if (p) showToast(`${p.name} removed`);
 }
 
-// ── LOG GAME UI ───────────────────────────────────────────────────────────────
+// ── LOG GAME UI ───────────────────────────────────────────
 function openLogGame() {
   if (!players.length) { showToast('Add a player first'); return; }
   logSelectedPlayers = [];
-  teamAssignments = [];
-  teamRankOrder = [];
-  document.getElementById('log-type').value = 'solo';
+  teamAssignments    = [];
+  teamRankOrder      = [];
+  document.getElementById('log-type').value    = 'solo';
+  document.getElementById('team-format').value = '2v2';
   updateLogUI();
-  document.getElementById('modal-log').style.display='';
+  document.getElementById('modal-log').style.display = '';
 }
 
 function updateLogUI() {
-  const type = document.getElementById('log-type').value;
+  const type   = document.getElementById('log-type').value;
   const isSolo = type === 'solo';
 
-  document.getElementById('team-config').style.display    = isSolo ? 'none' : '';
-  document.getElementById('step2-solo').style.display     = isSolo ? '' : 'none';
-  document.getElementById('step2-team').style.display     = isSolo ? 'none' : '';
-  document.getElementById('step3-solo').style.display     = isSolo ? '' : 'none';
-  document.getElementById('step3-team').style.display     = isSolo ? 'none' : '';
+  document.getElementById('team-config').style.display   = isSolo ? 'none' : '';
+  document.getElementById('step2-solo').style.display    = isSolo ? '' : 'none';
+  document.getElementById('step2-team').style.display    = isSolo ? 'none' : '';
+  document.getElementById('step3-solo').style.display    = isSolo ? '' : 'none';
+  document.getElementById('step3-team').style.display    = isSolo ? 'none' : '';
 
   logSelectedPlayers = [];
-  teamRankOrder = [];
+  teamRankOrder      = [];
 
   if (isSolo) {
     renderPlayerChips();
     renderSoloRankList();
   } else {
-    const numTeams = parseInt(document.getElementById('num-teams').value) || 2;
-    const teamSize = parseInt(document.getElementById('team-size').value) || 2;
-    // reset team assignments
-    teamAssignments = Array.from({length: numTeams}, () => []);
-    teamRankOrder = Array.from({length: numTeams}, (_, i) => i);
-    renderTeamAssignUI(numTeams, teamSize);
-    renderTeamRankList(numTeams);
+    const fmt = document.getElementById('team-format').value;
+    const { numTeams, teamSize } = parseFormat(fmt);
+    teamAssignments = Array.from({ length: numTeams }, () => []);
+    teamRankOrder   = Array.from({ length: numTeams }, (_, i) => i);
+    renderTeamAssignUI(fmt, numTeams, teamSize);
+    renderTeamRankList(fmt, numTeams);
   }
 }
 
-// SOLO: player chip selection
+function parseFormat(fmt) {
+  // '2v2' → {numTeams:2, teamSize:2}
+  // '3v3' → {numTeams:2, teamSize:3}
+  // '2v2v2' → {numTeams:3, teamSize:2}
+  const parts = fmt.split('v').map(Number);
+  return { numTeams: parts.length, teamSize: parts[0] };
+}
+
+// SOLO chips
 function renderPlayerChips() {
-  const el = document.getElementById('player-chips');
-  el.innerHTML = players.map(p => {
+  document.getElementById('player-chips').innerHTML = players.map(p => {
     const sel = logSelectedPlayers.includes(p.id);
-    return `<button class="chip${sel?' selected':''}" onclick="toggleSoloPlayer('${p.id}')">${p.name}</button>`;
+    return `<button class="chip${sel ? ' selected' : ''}" onclick="toggleSoloPlayer('${p.id}')">${p.name}</button>`;
   }).join('');
 }
 
 function toggleSoloPlayer(id) {
-  if (logSelectedPlayers.includes(id)) {
-    logSelectedPlayers = logSelectedPlayers.filter(x=>x!==id);
-  } else {
-    logSelectedPlayers.push(id);
-  }
+  if (logSelectedPlayers.includes(id)) logSelectedPlayers = logSelectedPlayers.filter(x => x !== id);
+  else logSelectedPlayers.push(id);
   renderPlayerChips();
   renderSoloRankList();
 }
 
-// SOLO: rank slots — click a selected player to assign to next open slot
 function renderSoloRankList() {
   const el = document.getElementById('solo-rank-list');
-  if (!logSelectedPlayers.length) { el.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:6px 0">Select players above to assign rankings</div>'; return; }
+  const note = document.getElementById('solo-pts-note');
+  const count = logSelectedPlayers.length;
+
+  if (!count) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:6px 0">Select players above — they appear here in finishing order</div>';
+    note.textContent = '';
+    return;
+  }
+
+  const table = SOLO_PTS_BY_COUNT[count] || [];
+
   let html = '';
   logSelectedPlayers.forEach((pid, i) => {
-    const p = players.find(x=>x.id===pid);
-    const pts = SOLO_PTS[i] ?? 0;
-    const posClass = i===0?'gold-pos':i===1?'silver-pos':i===2?'bronze-pos':'';
+    const p   = players.find(x => x.id === pid);
+    const pts = table[i] ?? 0;
+    const posClass   = i === 0 ? 'gold-pos' : i === 1 ? 'silver-pos' : i === 2 ? 'bronze-pos' : '';
+    const ptsClass   = pts > 0 ? 'earned' : 'zero';
+    const ptsLabel   = pts > 0 ? `+${pts}pt${pts !== 1 ? 's' : ''}` : '0 pts';
     html += `<div class="rank-slot">
       <span class="rank-slot-pos ${posClass}">${placeEmoji(i)}</span>
-      <span class="rank-slot-name filled">${p?.name||'?'}</span>
-      <span class="rank-slot-pts earned">+${pts}pt${pts!==1?'s':''}</span>
-      <button class="rank-slot-remove" onclick="removeSoloRank(${i})" title="Remove">✕</button>
+      <span class="rank-slot-name filled">${p?.name || '?'}</span>
+      <span class="rank-slot-pts ${ptsClass}">${ptsLabel}</span>
+      <button class="rank-slot-remove" onclick="removeSoloRank(${i})">✕</button>
     </div>`;
   });
   el.innerHTML = html;
+
+  // Show which point table applies
+  if (SOLO_PTS_BY_COUNT[count]) {
+    note.textContent = `${count}-player game: using ${count}p point table`;
+  } else if (count < 3) {
+    note.textContent = 'Select at least 3 players for a valid solo game';
+  } else {
+    note.textContent = `${count}-player game`;
+  }
 }
 
 function removeSoloRank(i) {
@@ -1189,124 +1300,117 @@ function removeSoloRank(i) {
   renderSoloRankList();
 }
 
-// TEAM: assign players to teams
-function renderTeamAssignUI(numTeams, teamSize) {
+// TEAM assign
+function renderTeamAssignUI(fmt, numTeams, teamSize) {
   const el = document.getElementById('team-assign-ui');
-  const assignedAll = [];
-  teamAssignments.forEach(t => t.forEach(id => assignedAll.push(id)));
-
+  const assignedAll = teamAssignments.flat();
   let html = '';
   for (let t = 0; t < numTeams; t++) {
-    const label = `Team ${String.fromCharCode(65+t)}`; // A, B, C
     const slots = teamAssignments[t] || [];
+    const label = `Team ${String.fromCharCode(65 + t)}`;
     html += `<div class="team-block">
       <div class="team-block-label">${label} <span class="team-rank-badge">${slots.length}/${teamSize} players</span></div>
-      <div class="chips">
-        ${players.map(p => {
-          const inThisTeam = slots.includes(p.id);
-          const inOtherTeam = !inThisTeam && assignedAll.includes(p.id);
-          return `<button class="chip${inThisTeam?' selected':''}${inOtherTeam?' disabled':''}"
-            onclick="toggleTeamPlayer(${t},'${p.id}',${teamSize})">${p.name}</button>`;
-        }).join('')}
-      </div>
+      <div class="chips">${players.map(p => {
+        const inThis  = slots.includes(p.id);
+        const inOther = !inThis && assignedAll.includes(p.id);
+        return `<button class="chip${inThis?' selected':''}${inOther?' disabled':''}" onclick="toggleTeamPlayer(${t},'${p.id}',${teamSize},'${fmt}')">${p.name}</button>`;
+      }).join('')}</div>
     </div>`;
   }
   el.innerHTML = html;
 }
 
-function toggleTeamPlayer(teamIdx, pid, teamSize) {
+function toggleTeamPlayer(teamIdx, pid, teamSize, fmt) {
   const team = teamAssignments[teamIdx];
   if (team.includes(pid)) {
-    teamAssignments[teamIdx] = team.filter(x=>x!==pid);
+    teamAssignments[teamIdx] = team.filter(x => x !== pid);
   } else {
-    if (team.length >= teamSize) { showToast(`Team ${String.fromCharCode(65+teamIdx)} is full`); return; }
+    if (team.length >= teamSize) { showToast(`Team ${String.fromCharCode(65 + teamIdx)} is full`); return; }
     teamAssignments[teamIdx].push(pid);
   }
-  const numTeams = parseInt(document.getElementById('num-teams').value) || 2;
-  renderTeamAssignUI(numTeams, teamSize);
+  const { numTeams } = parseFormat(fmt);
+  renderTeamAssignUI(fmt, numTeams, teamSize);
 }
 
-// TEAM: rank teams
-function renderTeamRankList(numTeams) {
-  const el = document.getElementById('team-rank-list');
+function renderTeamRankList(fmt, numTeams) {
+  const el    = document.getElementById('team-rank-list');
+  const table = TEAM_PTS_BY_FORMAT[fmt] || [];
   let html = '';
   for (let rank = 0; rank < numTeams; rank++) {
-    const teamIdx = teamRankOrder[rank];
-    const teamName = `Team ${String.fromCharCode(65+teamIdx)}`;
-    const pts = TEAM_PTS[rank] ?? 0;
-    const posClass = rank===0?'gold-pos':rank===1?'silver-pos':rank===2?'bronze-pos':'';
-    const badgeClass = rank===0?'t1':rank===1?'t2':'t3';
+    const teamIdx   = teamRankOrder[rank];
+    const teamName  = `Team ${String.fromCharCode(65 + teamIdx)}`;
+    const pts       = table[rank] ?? 0;
+    const posClass  = rank === 0 ? 'gold-pos' : rank === 1 ? 'silver-pos' : 'bronze-pos';
+    const badgeCls  = rank === 0 ? 't1' : rank === 1 ? 't2' : 't3';
+    const ptsClass  = pts > 0 ? 'earned' : 'zero';
+    const ptsLabel  = pts > 0 ? `+${pts}pt${pts !== 1 ? 's' : ''} each` : '0 pts';
     html += `<div class="rank-slot">
       <span class="rank-slot-pos ${posClass}">${placeEmoji(rank)}</span>
-      <span class="rank-slot-name filled"><span class="team-rank-badge ${badgeClass}">${teamName}</span></span>
-      <span class="rank-slot-pts earned">+${pts}pt${pts!==1?'s':''} each</span>
-      ${rank > 0 ? `<button class="rank-slot-remove" onclick="moveTeamUp(${rank})" title="Move up">↑</button>` : ''}
+      <span class="rank-slot-name filled"><span class="team-rank-badge ${badgeCls}">${teamName}</span></span>
+      <span class="rank-slot-pts ${ptsClass}">${ptsLabel}</span>
+      ${rank > 0 ? `<button class="rank-slot-remove" onclick="moveTeamUp(${rank},'${fmt}',${numTeams})" title="Move up">↑</button>` : ''}
     </div>`;
   }
   el.innerHTML = html;
 }
 
-function moveTeamUp(rank) {
-  const tmp = teamRankOrder[rank-1];
-  teamRankOrder[rank-1] = teamRankOrder[rank];
-  teamRankOrder[rank] = tmp;
-  const numTeams = parseInt(document.getElementById('num-teams').value) || 2;
-  renderTeamRankList(numTeams);
+function moveTeamUp(rank, fmt, numTeams) {
+  [teamRankOrder[rank - 1], teamRankOrder[rank]] = [teamRankOrder[rank], teamRankOrder[rank - 1]];
+  renderTeamRankList(fmt, numTeams);
 }
 
-// ── CONFIRM LOG GAME ──────────────────────────────────────────────────────────
+// ── CONFIRM LOG GAME ──────────────────────────────────────
 function confirmLogGame() {
   const type = document.getElementById('log-type').value;
-  const date = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
   if (type === 'solo') {
-    if (logSelectedPlayers.length < 2) { showToast('Select at least 2 players'); return; }
-    games.push({ id:'g'+Date.now(), type:'solo', rankings:[...logSelectedPlayers], date });
-    const winner = players.find(p=>p.id===logSelectedPlayers[0])?.name || '?';
+    const count = logSelectedPlayers.length;
+    if (count < 3 || count > 6) { showToast('Solo games need 3–6 players'); return; }
+    if (!SOLO_PTS_BY_COUNT[count]) { showToast(`No point table for ${count} players`); return; }
+    games.push({ id: 'g' + Date.now(), type: 'solo', rankings: [...logSelectedPlayers], date });
+    const winner = players.find(p => p.id === logSelectedPlayers[0])?.name || '?';
     save(); closeModals(); renderTable();
     showToast(`${winner} wins! 🏆`);
   } else {
-    const numTeams = parseInt(document.getElementById('num-teams').value) || 2;
-    const teamSize = parseInt(document.getElementById('team-size').value) || 2;
+    const fmt = document.getElementById('team-format').value;
+    const { numTeams, teamSize } = parseFormat(fmt);
     for (let t = 0; t < numTeams; t++) {
       if (teamAssignments[t].length !== teamSize) {
-        showToast(`Team ${String.fromCharCode(65+t)} needs ${teamSize} players`); return;
+        showToast(`Team ${String.fromCharCode(65 + t)} needs ${teamSize} player${teamSize > 1 ? 's' : ''}`);
+        return;
       }
     }
-    // rankings = array of teams in finishing order, each team is array of player ids
     const rankings = teamRankOrder.map(ti => [...teamAssignments[ti]]);
-    games.push({ id:'g'+Date.now(), type:'team', rankings, date });
-    const winTeamIdx = teamRankOrder[0];
-    const winNames = teamAssignments[winTeamIdx].map(id=>players.find(p=>p.id===id)?.name||'?').join(' & ');
+    games.push({ id: 'g' + Date.now(), type: 'team', format: fmt, rankings, date });
+    const winTeam  = teamAssignments[teamRankOrder[0]];
+    const winNames = winTeam.map(id => players.find(p => p.id === id)?.name || '?').join(' & ');
     save(); closeModals(); renderTable();
     showToast(`${winNames} win! 🏆`);
   }
 }
 
-// ── DELETE / RESTORE GAME ─────────────────────────────────────────────────────
+// ── DELETE / RESTORE GAME ─────────────────────────────────
 function openDeleteGame(id) {
   deleteGameTarget = id;
   document.getElementById('deleter-name').value = '';
   document.getElementById('modal-delete-game').style.display = '';
-  setTimeout(()=>document.getElementById('deleter-name').focus(), 50);
+  setTimeout(() => document.getElementById('deleter-name').focus(), 50);
 }
-
 function confirmDeleteGame() {
   if (!deleteGameTarget) return;
-  const deleterName = document.getElementById('deleter-name').value.trim();
-  if (!deleterName) { showToast('Enter your name first'); return; }
+  const name = document.getElementById('deleter-name').value.trim();
+  if (!name) { showToast('Enter your name first'); return; }
   const idx = games.findIndex(g => g.id === deleteGameTarget);
   if (idx === -1) return;
-  const game = games[idx];
-  const deletedAt = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  deletedGames.push({ ...game, deletedBy: deleterName, deletedAt });
+  const deletedAt = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  deletedGames.push({ ...games[idx], deletedBy: name, deletedAt });
   games.splice(idx, 1);
   deleteGameTarget = null;
   save(); closeModals(); renderTable();
   if (document.getElementById('tab-history').style.display !== 'none') renderHistory();
   showToast('Game moved to Deleted games');
 }
-
 function restoreGame(id) {
   const idx = deletedGames.findIndex(g => g.id === id);
   if (idx === -1) return;
@@ -1317,33 +1421,33 @@ function restoreGame(id) {
   showToast('Game restored ✓');
 }
 
-// ── CLOSE MODALS ──────────────────────────────────────────────────────────────
+// ── CLOSE MODALS ──────────────────────────────────────────
 function closeModals() {
   ['modal-add','modal-log','modal-remove','modal-delete-game'].forEach(id => {
-    document.getElementById(id).style.display='none';
+    document.getElementById(id).style.display = 'none';
   });
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
+// ── TOAST ─────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2400);
+  setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────
 function init() {
   if (window._firebaseReady && window._fbLoad) {
     window._fbLoad();
   } else {
-    document.addEventListener("firebase-ready", () => window._fbLoad(), { once: true });
+    document.addEventListener('firebase-ready', () => window._fbLoad(), { once: true });
   }
 }
 
-(function() {
+(function () {
   const body = document.getElementById('leaderboard-body');
-  if (body) body.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>Connecting to database…</div></td></tr>`;
+  if (body) body.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>Connecting to database…</div></td></tr>`;
 })();
 
 init();
