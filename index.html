@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monopoly League</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD06sHEzX0EbclhwO8P4I3BzT0GyWBOoS8",
+    authDomain: "monopoly-league-e7c1a.firebaseapp.com",
+    projectId: "monopoly-league-e7c1a",
+    storageBucket: "monopoly-league-e7c1a.firebasestorage.app",
+    messagingSenderId: "591055287977",
+    appId: "1:591055287977:web:393d6d1273d9ef0e129bb8"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const DATA_DOC = doc(db, "monopoly-league", "data");
+
+  window._fbSave = async function(players, games) {
+    try {
+      await setDoc(DATA_DOC, { players, games });
+    } catch (e) {
+      console.error("Firebase save error:", e);
+      showToast("⚠️ Save failed — check your Firebase config");
+    }
+  };
+
+  onSnapshot(DATA_DOC, (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    const incoming = JSON.stringify(data);
+    if (incoming === window._lastSaved) return;
+    window._lastSaved = incoming;
+    players = data.players || [];
+    games   = data.games   || [];
+    prevRanks = {};
+    renderTable();
+    if (document.getElementById('tab-history').style.display !== 'none') renderHistory();
+  }, (err) => {
+    console.error("Firestore listener error:", err);
+    showToast("⚠️ Could not connect to database");
+  });
+
+  window._fbLoad = async function() {
+    try {
+      const snap = await getDoc(DATA_DOC);
+      if (snap.exists()) {
+        const data = snap.data();
+        players = data.players || [];
+        games   = data.games   || [];
+        window._lastSaved = JSON.stringify(data);
+      }
+    } catch(e) {
+      console.error("Firebase load error:", e);
+      showToast("⚠️ Could not load data — check your Firebase config");
+    }
+    renderTable();
+  };
+
+  window._firebaseReady = true;
+  document.dispatchEvent(new Event("firebase-ready"));
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f5f5f3;
+  --bg-tertiary: #eceae4;
+  --text: #1a1a18;
+  --text-secondary: #6b6b67;
+  --text-tertiary: #9d9d99;
+  --border: rgba(0,0,0,0.10);
+  --border-md: rgba(0,0,0,0.20);
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --gold: #c8860a;
+  --silver: #7a7a78;
+  --bronze: #8a3d1a;
+  --green-bg: #E1F5EE;
+  --green-text: #085041;
+  --blue-bg: #E6F1FB;
+  --blue-text: #0C447C;
+  --red-bg: #FCEBEB;
+  --red-text: #A32D2D;
+  --relegation: #e53535;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #181816;
+    --bg-secondary: #222220;
+    --bg-tertiary: #111110;
+    --text: #f0efea;
+    --text-secondary: #a0a09c;
+    --text-tertiary: #6b6b67;
+    --border: rgba(255,255,255,0.08);
+    --border-md: rgba(255,255,255,0.18);
+    --gold: #EF9F27;
+    --silver: #B4B2A9;
+    --bronze: #F0997B;
+    --green-bg: #04342C;
+    --green-text: #9FE1CB;
+    --blue-bg: #042C53;
+    --blue-text: #B5D4F4;
+    --red-bg: #3a0f0f;
+    --red-text: #F7C1C1;
+    --relegation: #ff4444;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-tertiary);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+}
+
+.container { max-width: 860px; margin: 0 auto; }
+
+.card {
+  background: var(--bg);
+  border-radius: var(--radius-xl);
+  border: 0.5px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+.header {
+  padding: 1.5rem 1.5rem 0;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+
+.title-block h1 {
+  font-size: 24px; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.title-block p { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+button {
+  cursor: pointer; border-radius: var(--radius-md);
+  font-size: 13px; padding: 8px 14px;
+  border: 0.5px solid var(--border-md);
+  background: transparent; color: var(--text);
+  font-family: inherit;
+  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+button:hover { background: var(--bg-secondary); }
+button:active { transform: scale(0.97); }
+button.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+button.primary:hover { opacity: 0.82; }
+button.danger { color: var(--red-text); border-color: var(--border); padding: 5px 9px; font-size: 12px; }
+button.danger:hover { background: var(--red-bg); }
+
+.tabs {
+  display: flex; border-bottom: 0.5px solid var(--border);
+  padding: 0 1.5rem; margin-top: 1rem;
+}
+.tab {
+  padding: 9px 14px; font-size: 13px; cursor: pointer;
+  color: var(--text-secondary); border: none;
+  border-bottom: 2px solid transparent; margin-bottom: -0.5px;
+  background: none; border-radius: 0; font-family: inherit; transition: color 0.15s;
+}
+.tab:hover { background: none; color: var(--text); }
+.tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
+
+.table-wrap { padding: 1rem 1.5rem 1.5rem; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead tr { border-bottom: 1.5px solid var(--border-md); }
+th {
+  text-align: left; padding: 8px 10px;
+  font-size: 11px; font-weight: 500; color: var(--text-secondary);
+  letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
+}
+th.num, td.num { text-align: center; }
+td { padding: 0; color: var(--text); }
+td > .cell-inner { padding: 11px 10px; display: flex; align-items: center; }
+td.num > .cell-inner { justify-content: center; }
+
+tbody tr { transition: background 0.2s; }
+tbody tr:hover { background: var(--bg-secondary); }
+
+@keyframes slideDown { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform: translateY(0); } }
+@keyframes slideUp   { from { opacity:0; transform: translateY(8px);  } to { opacity:1; transform: translateY(0); } }
+@keyframes fadeIn    { from { opacity:0; } to { opacity:1; } }
+
+tr.anim-down { animation: slideDown 0.35s ease forwards; }
+tr.anim-up   { animation: slideUp   0.35s ease forwards; }
+tr.anim-in   { animation: fadeIn    0.4s ease forwards; }
+
+tr.relegation-border td > .cell-inner { border-top: 2px solid var(--relegation); }
+tr.relegation-row { background: rgba(229,53,53,0.04); }
+tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
+
+.pos-wrap { display: flex; align-items: center; justify-content: center; position: relative; width: 32px; }
+.crown { font-size: 22px; line-height:1; }
+.crown.gold   { filter: drop-shadow(0 1px 3px rgba(200,134,10,0.5)); }
+.crown.silver { filter: drop-shadow(0 1px 2px rgba(120,120,120,0.4)); }
+.crown.bronze { filter: drop-shadow(0 1px 2px rgba(138,61,26,0.4)); }
+.pos-num { font-weight: 600; color: var(--text-secondary); font-size: 14px; }
+
+.trend { font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 1px; }
+.trend.up   { color: #16a34a; }
+.trend.down { color: var(--relegation); }
+.trend.same { color: var(--text-tertiary); }
+
+.player-name { font-weight: 600; display: flex; align-items: center; gap: 9px; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+  border: 1.5px solid rgba(0,0,0,0.06);
+}
+
+.pts { font-weight: 700; font-size: 16px; }
+.pts.leader { color: #0d9260; }
+.stat { font-size: 13px; color: var(--text-secondary); }
+
+.badge { font-size: 11px; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+.badge.solo { background: var(--blue-bg); color: var(--blue-text); }
+.badge.team { background: var(--green-bg); color: var(--green-text); }
+
+.rel-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500; color: var(--relegation);
+  padding: 6px 10px 2px;
+  opacity: 0.85;
+}
+
+.empty-state {
+  text-align: center; padding: 3.5rem 1.5rem;
+  color: var(--text-secondary); font-size: 14px; line-height: 1.8;
+}
+.empty-state i { font-size: 40px; display: block; margin-bottom: 12px; color: var(--text-tertiary); }
+
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; padding: 1rem;
+  animation: fadeIn 0.15s ease;
+}
+.modal {
+  background: var(--bg); border-radius: var(--radius-xl);
+  border: 0.5px solid var(--border); padding: 1.5rem;
+  width: 380px; max-width: 100%;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+  animation: slideDown 0.2s ease;
+}
+.modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 1rem; }
+.modal label {
+  font-size: 11px; font-weight: 600; color: var(--text-secondary);
+  display: block; margin-bottom: 5px; margin-top: 14px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.modal input, .modal select {
+  width: 100%; padding: 9px 11px;
+  border: 0.5px solid var(--border-md); border-radius: var(--radius-md);
+  background: var(--bg-secondary); color: var(--text);
+  font-size: 14px; font-family: inherit; outline: none;
+  transition: border-color 0.15s;
+}
+.modal input:focus, .modal select:focus { border-color: var(--text); }
+.modal-actions { display: flex; gap: 8px; margin-top: 1.5rem; justify-content: flex-end; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chip {
+  padding: 6px 12px; border-radius: 20px;
+  border: 0.5px solid var(--border-md);
+  font-size: 13px; cursor: pointer;
+  background: transparent; color: var(--text);
+  font-family: inherit; transition: background 0.12s, transform 0.1s;
+}
+.chip:hover { background: var(--bg-secondary); }
+.chip:active { transform: scale(0.96); }
+.chip.selected { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+.history-section { padding: 0.5rem 1.5rem 1.5rem; }
+.history-item {
+  padding: 11px 0; border-bottom: 0.5px solid var(--border);
+  font-size: 13px; display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 12px;
+}
+.history-item:last-child { border-bottom: none; }
+.history-winner { font-weight: 600; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.history-also { color: var(--text-secondary); font-size: 12px; }
+.history-date { color: var(--text-tertiary); font-size: 12px; white-space: nowrap; margin-top: 2px; }
+.no-history { text-align: center; padding: 3rem; color: var(--text-tertiary); font-size: 13px; }
+.no-history i { font-size: 28px; display: block; margin-bottom: 8px; }
+
+.toast {
+  position: fixed; bottom: 1.5rem; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text); color: var(--bg);
+  padding: 10px 18px; border-radius: var(--radius-lg);
+  font-size: 13px; font-weight: 600;
+  opacity: 0; transition: opacity 0.2s, transform 0.2s;
+  z-index: 200; white-space: nowrap; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.form-row { display: flex; gap: 10px; }
+.form-row > * { flex: 1; }
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+
+    <div class="header">
+      <div class="title-block">
+        <h1>🎩 Monopoly League</h1>
+        <p id="subtitle">0 players · 0 games played</p>
+      </div>
+      <div class="header-actions">
+        <button onclick="openAddPlayer()"><i class="ti ti-plus"></i> Add player</button>
+        <button class="primary" onclick="openLogGame()"><i class="ti ti-trophy"></i> Log game</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('table')">Table</button>
+      <button class="tab" onclick="switchTab('history')">Game history</button>
+    </div>
+
+    <div id="tab-table">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:44px">#</th>
+              <th style="width:22px"></th>
+              <th>Player</th>
+              <th class="num">Played</th>
+              <th class="num">Solo wins</th>
+              <th class="num">Team wins</th>
+              <th class="num">Win %</th>
+              <th class="num">Points</th>
+              <th style="width:44px"></th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-history" style="display:none">
+      <div class="history-section" id="history-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Add Player -->
+<div id="modal-add" style="display:none">
+  <div class="modal-bg" onclick="closeModals()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h2>Add player</h2>
+      <label>Name</label>
+      <input type="text" id="new-player-name" placeholder="e.g. Alex" onkeydown="if(event.key==='Enter')confirmAddPlayer()" />
+      <div class="modal-actions">
+        <button onclick="closeModals()">Cancel</button>
+        <button class="primary" onclick="confirmAddPlayer()">Add player</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Log Game -->
+<div id="modal-log" style="display:none">
+  <div class="modal-bg" onclick="closeModals()">
+    <div class="modal" style="width:440px" onclick="event.stopPropagation()">
+      <h2>Log game result</h2>
+      <label>Game type</label>
+      <select id="log-type" onchange="updateGameTypeUI()">
+        <option value="solo">Solo game — winner gets 2 pts</option>
+        <option value="team">Team game — each winner gets 1 pt</option>
+      </select>
+      <div id="team-size-row" style="display:none">
+        <label>Players per team</label>
+        <select id="team-size">
+          <option value="2">2 players per team</option>
+          <option value="3">3 players per team</option>
+        </select>
+      </div>
+      <label id="winner-label">Winner</label>
+      <div class="chips" id="winner-chips"></div>
+      <label>Other participants <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional — tracks games played)</span></label>
+      <div class="chips" id="loser-chips"></div>
+      <div class="modal-actions">
+        <button onclick="closeModals()">Cancel</button>
+        <button class="primary" onclick="confirmLogGame()"><i class="ti ti-check"></i> Log game</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Remove -->
+<div id="modal-remove" style="display:none">
+  <div class="modal-bg" onclick="closeModals()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h2>Remove player?</h2>
+      <p style="font-size:14px;color:var(--text-secondary);margin-top:4px;line-height:1.6">All stats for <strong id="remove-name"></strong> will be deleted. This can't be undone.</p>
+      <div class="modal-actions">
+        <button onclick="closeModals()">Cancel</button>
+        <button class="danger" onclick="confirmRemovePlayer()"><i class="ti ti-trash"></i> Remove</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const AVATAR_COLORS = [
+  ['#DBEAFE','#1e40af'],['#D1FAE5','#065f46'],['#FEF3C7','#92400e'],
+  ['#FCE7F3','#9d174d'],['#E0E7FF','#3730a3'],['#FEE2E2','#991b1b'],
+  ['#ECFDF5','#064e3b'],['#FFF7ED','#7c2d12'],['#F0FDF4','#14532d'],
+  ['#EFF6FF','#1e3a8a'],['#FDF4FF','#581c87'],['#FFF1F2','#881337']
+];
+
+let players = [];
+let games = [];
+let removeTarget = null;
+let selectedWinners = [];
+let selectedLosers = [];
+let prevRanks = {};
+
+function save() {
+  const payload = { players, games };
+  window._lastSaved = JSON.stringify(payload);
+  if (window._fbSave) window._fbSave(players, games);
+}
+
+function getInitials(name) {
+  return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+}
+
+function getStats(pid) {
+  let gp=0, pts=0, sw=0, tw=0;
+  for (const g of games) {
+    const inW = g.winners.includes(pid);
+    const inL = g.losers && g.losers.includes(pid);
+    if (inW||inL) gp++;
+    if (inW) {
+      if (g.type==='solo') { pts+=2; sw++; }
+      else { pts+=1; tw++; }
+    }
+  }
+  const totalWins = sw + tw;
+  const winPct = gp > 0 ? Math.round((totalWins / gp) * 100) : null;
+  return {gp,pts,sw,tw,totalWins,winPct};
+}
+
+function getRanked() {
+  return players.map(p=>({...p,...getStats(p.id)}))
+    .sort((a,b)=>{
+      if (a.gp === 0 && b.gp === 0) return a.name.localeCompare(b.name);
+      if (a.gp === 0) return 1;
+      if (b.gp === 0) return -1;
+      const pctDiff = (b.winPct ?? 0) - (a.winPct ?? 0);
+      if (pctDiff !== 0) return pctDiff;
+      return b.pts - a.pts || b.gp - a.gp || a.name.localeCompare(b.name);
+    });
+}
+
+function renderTable() {
+  const body = document.getElementById('leaderboard-body');
+  if (!players.length) {
+    body.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="ti ti-users"></i>No players yet.<br>Hit "Add player" to get started.</div></td></tr>`;
+    document.getElementById('subtitle').textContent = '0 players · 0 games played';
+    prevRanks = {};
+    return;
+  }
+
+  const ranked = getRanked();
+  const total = ranked.length;
+  const relegZone = total >= 4 ? 2 : 0;
+
+  document.getElementById('subtitle').textContent =
+    `${total} player${total!==1?'s':''} · ${games.length} game${games.length!==1?'s':''} played`;
+
+  let html = '';
+  const relegStartPos = total - relegZone + 1;
+
+  ranked.forEach((p, i) => {
+    const pos = i + 1;
+    const prev = prevRanks[p.id];
+    let animClass = '';
+    if (prev !== undefined) {
+      if (pos < prev) animClass = ' anim-down';
+      else if (pos > prev) animClass = ' anim-up';
+    } else {
+      animClass = ' anim-in';
+    }
+
+    let trendHtml = '';
+    if (prev !== undefined) {
+      const diff = prev - pos;
+      if (diff > 0) trendHtml = `<span class="trend up"><i class="ti ti-arrow-up" style="font-size:12px"></i>${diff}</span>`;
+      else if (diff < 0) trendHtml = `<span class="trend down"><i class="ti ti-arrow-down" style="font-size:12px"></i>${Math.abs(diff)}</span>`;
+      else trendHtml = `<span class="trend same">—</span>`;
+    }
+
+    let posHtml = '';
+    if (pos === 1) posHtml = `<span class="crown gold" title="1st place">👑</span>`;
+    else if (pos === 2) posHtml = `<span class="crown silver" title="2nd place" style="font-size:17px">🥈</span>`;
+    else if (pos === 3) posHtml = `<span class="crown bronze" title="3rd place" style="font-size:17px">🥉</span>`;
+    else posHtml = `<span class="pos-num">${pos}</span>`;
+
+    const [bg, fg] = AVATAR_COLORS[p.colorIdx % AVATAR_COLORS.length];
+    const ptsClass = pos===1 && p.pts>0 ? 'pts leader' : 'pts';
+
+    let winPctHtml = '—';
+    if (p.winPct !== null) {
+      let pctColor = 'var(--text-secondary)';
+      if (p.winPct >= 60) pctColor = '#16a34a';
+      else if (p.winPct >= 40) pctColor = '#ca8a04';
+      else pctColor = 'var(--relegation)';
+      winPctHtml = `<span style="font-weight:600;color:${pctColor}">${p.winPct}%</span>`;
+    }
+
+    const isRelegBorder = relegZone > 0 && pos === relegStartPos;
+    const isRelegRow = relegZone > 0 && pos >= relegStartPos;
+
+    let rowClass = animClass;
+    if (isRelegRow) rowClass += ' relegation-row';
+
+    html += `<tr class="${rowClass.trim()}">
+      <td><div class="cell-inner${isRelegBorder?' relegation-border':''}"><div class="pos-wrap">${posHtml}</div></div></td>
+      <td><div class="cell-inner${isRelegBorder?' relegation-border':''}">${trendHtml}</div></td>
+      <td><div class="cell-inner${isRelegBorder?' relegation-border':''}">
+        <span class="player-name">
+          <span class="avatar" style="background:${bg};color:${fg}">${getInitials(p.name)}</span>
+          ${p.name}
+          ${pos===1&&p.pts>0?'<span style="font-size:11px;background:#fef9ec;color:#92400e;padding:2px 7px;border-radius:10px;font-weight:600;margin-left:4px">Leader</span>':''}
+        </span>
+      </div></td>
+      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}"><span class="stat">${p.gp}</span></div></td>
+      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}"><span class="stat">${p.sw}</span></div></td>
+      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}"><span class="stat">${p.tw}</span></div></td>
+      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}">${winPctHtml}</div></td>
+      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}"><span class="${ptsClass}">${p.pts}</span></div></td>
+      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}">
+        <button class="danger" onclick="openRemove('${p.id}','${p.name.replace(/'/g,"\\'")}')"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr>`;
+  });
+
+  body.innerHTML = html;
+  ranked.forEach((p, i) => { prevRanks[p.id] = i + 1; });
+
+  const existing = document.getElementById('rel-legend');
+  if (existing) existing.remove();
+  if (relegZone > 0) {
+    const wrap = document.querySelector('.table-wrap');
+    const leg = document.createElement('div');
+    leg.id = 'rel-legend';
+    leg.innerHTML = `<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--relegation);padding:8px 0 0;font-weight:500;opacity:0.8">
+      <span style="display:inline-block;width:16px;height:2px;background:var(--relegation);border-radius:1px"></span>
+      Relegation zone — bottom ${relegZone}
+    </div>`;
+    wrap.appendChild(leg);
+  }
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if (!games.length) {
+    el.innerHTML = '<div class="no-history"><i class="ti ti-history"></i>No games logged yet.</div>';
+    return;
+  }
+  const sorted = [...games].reverse();
+  let html = '';
+  sorted.forEach(g => {
+    const wNames = g.winners.map(id=>players.find(p=>p.id===id)?.name||'?').join(', ');
+    const lNames = g.losers&&g.losers.length ? g.losers.map(id=>players.find(p=>p.id===id)?.name||'?').join(', ') : null;
+    const badge = g.type==='solo'
+      ? `<span class="badge solo">Solo +2pts</span>`
+      : `<span class="badge team">Team +1pt</span>`;
+    html += `<div class="history-item">
+      <div>
+        <div class="history-winner">🏆 ${wNames} won ${badge}</div>
+        ${lNames?`<div class="history-also">Also played: ${lNames}</div>`:''}
+      </div>
+      <div class="history-date">${g.date}</div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='table'?0:1)));
+  document.getElementById('tab-table').style.display = tab==='table'?'':'none';
+  document.getElementById('tab-history').style.display = tab==='history'?'':'none';
+  if (tab==='history') renderHistory();
+}
+
+function openAddPlayer() {
+  document.getElementById('new-player-name').value='';
+  document.getElementById('modal-add').style.display='';
+  setTimeout(()=>document.getElementById('new-player-name').focus(),50);
+}
+
+function confirmAddPlayer() {
+  const name = document.getElementById('new-player-name').value.trim();
+  if (!name) return;
+  if (players.find(p=>p.name.toLowerCase()===name.toLowerCase())) { showToast('That name already exists'); return; }
+  players.push({id:'p'+Date.now(), name, colorIdx: players.length});
+  save(); closeModals(); renderTable();
+  showToast(`${name} added to the league!`);
+}
+
+function openRemove(id, name) {
+  removeTarget = id;
+  document.getElementById('remove-name').textContent = name;
+  document.getElementById('modal-remove').style.display='';
+}
+
+function confirmRemovePlayer() {
+  if (!removeTarget) return;
+  const p = players.find(x=>x.id===removeTarget);
+  players = players.filter(x=>x.id!==removeTarget);
+  games = games.filter(g=>!(g.winners.includes(removeTarget)||(g.losers&&g.losers.includes(removeTarget))));
+  delete prevRanks[removeTarget];
+  removeTarget = null;
+  save(); closeModals(); renderTable();
+  if (p) showToast(`${p.name} removed`);
+}
+
+function openLogGame() {
+  if (!players.length) { showToast('Add a player first'); return; }
+  selectedWinners=[]; selectedLosers=[];
+  updateGameTypeUI();
+  document.getElementById('modal-log').style.display='';
+}
+
+function updateGameTypeUI() {
+  const type = document.getElementById('log-type').value;
+  document.getElementById('team-size-row').style.display = type==='team'?'':'none';
+  document.getElementById('winner-label').textContent = type==='solo'?'Winner':'Winning team';
+  selectedWinners=[]; selectedLosers=[];
+  renderChips();
+}
+
+function renderChips() {
+  const wc = document.getElementById('winner-chips');
+  const lc = document.getElementById('loser-chips');
+  wc.innerHTML = players.map(p=>`<button class="chip${selectedWinners.includes(p.id)?' selected':''}" onclick="toggleWinner('${p.id}')">${p.name}</button>`).join('');
+  lc.innerHTML = players.filter(p=>!selectedWinners.includes(p.id)).map(p=>`<button class="chip${selectedLosers.includes(p.id)?' selected':''}" onclick="toggleLoser('${p.id}')">${p.name}</button>`).join('');
+}
+
+function toggleWinner(id) {
+  const type = document.getElementById('log-type').value;
+  if (type==='solo') {
+    selectedWinners = selectedWinners.includes(id)?[]:[id];
+  } else {
+    const sz = parseInt(document.getElementById('team-size').value)||2;
+    if (selectedWinners.includes(id)) selectedWinners=selectedWinners.filter(x=>x!==id);
+    else if (selectedWinners.length<sz) selectedWinners.push(id);
+    else showToast(`Max ${sz} players per winning team`);
+  }
+  selectedLosers=selectedLosers.filter(x=>!selectedWinners.includes(x));
+  renderChips();
+}
+
+function toggleLoser(id) {
+  if (selectedLosers.includes(id)) selectedLosers=selectedLosers.filter(x=>x!==id);
+  else selectedLosers.push(id);
+  renderChips();
+}
+
+function confirmLogGame() {
+  if (!selectedWinners.length) { showToast('Pick at least one winner'); return; }
+  const type = document.getElementById('log-type').value;
+  const date = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  games.push({id:'g'+Date.now(), type, winners:[...selectedWinners], losers:[...selectedLosers], date});
+  save(); closeModals(); renderTable();
+  const wNames = selectedWinners.map(id=>players.find(p=>p.id===id)?.name).join(' & ');
+  showToast(`${wNames} — W logged! 🏆`);
+}
+
+function closeModals() {
+  ['modal-add','modal-log','modal-remove'].forEach(id=>document.getElementById(id).style.display='none');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+function init() {
+  if (window._firebaseReady && window._fbLoad) {
+    window._fbLoad();
+  } else {
+    document.addEventListener("firebase-ready", () => window._fbLoad(), { once: true });
+  }
+}
+
+(function() {
+  const body = document.getElementById('leaderboard-body');
+  if (body) body.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>Connecting to database…</div></td></tr>`;
+})();
+
+init();
+</script>
+</body>
+</html>
