@@ -95,6 +95,8 @@
   --red-bg: #FCEBEB;
   --red-text: #A32D2D;
   --relegation: #e53535;
+  --amber-bg: #FEF3C7;
+  --amber-text: #92400e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -117,6 +119,8 @@
     --red-bg: #3a0f0f;
     --red-text: #F7C1C1;
     --relegation: #ff4444;
+    --amber-bg: #3a2a00;
+    --amber-text: #fcd34d;
   }
 }
 
@@ -173,7 +177,7 @@ button.restore:hover { background: var(--green-bg); }
 .tabs {
   display: flex; border-bottom: 0.5px solid var(--border);
   padding: 0 1.5rem; margin-top: 1rem;
-  overflow-x: auto; gap: 0;
+  overflow-x: auto;
 }
 .tab {
   padding: 9px 14px; font-size: 13px; cursor: pointer;
@@ -185,7 +189,6 @@ button.restore:hover { background: var(--green-bg); }
 .tab:hover { background: none; color: var(--text); }
 .tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
 
-/* deleted tab badge */
 .tab-badge {
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--red-bg); color: var(--red-text);
@@ -194,6 +197,7 @@ button.restore:hover { background: var(--green-bg); }
   border-radius: 8px; margin-left: 5px; line-height: 1;
 }
 
+/* TABLE */
 .table-wrap { padding: 1rem 1.5rem 1.5rem; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 thead tr { border-bottom: 1.5px solid var(--border-md); }
@@ -206,14 +210,12 @@ th.num, td.num { text-align: center; }
 td { padding: 0; color: var(--text); }
 td > .cell-inner { padding: 11px 10px; display: flex; align-items: center; }
 td.num > .cell-inner { justify-content: center; }
-
 tbody tr { transition: background 0.2s; }
 tbody tr:hover { background: var(--bg-secondary); }
 
 @keyframes slideDown { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform: translateY(0); } }
 @keyframes slideUp   { from { opacity:0; transform: translateY(8px);  } to { opacity:1; transform: translateY(0); } }
 @keyframes fadeIn    { from { opacity:0; } to { opacity:1; } }
-
 tr.anim-down { animation: slideDown 0.35s ease forwards; }
 tr.anim-up   { animation: slideUp   0.35s ease forwards; }
 tr.anim-in   { animation: fadeIn    0.4s ease forwards; }
@@ -234,34 +236,59 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 .trend.down { color: var(--relegation); }
 .trend.same { color: var(--text-tertiary); }
 
-.player-name { font-weight: 600; display: flex; align-items: center; gap: 9px; }
+.player-name { font-weight: 600; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .avatar {
   width: 32px; height: 32px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 700; flex-shrink: 0;
   border: 1.5px solid rgba(0,0,0,0.06);
 }
+.provisional-badge {
+  font-size: 10px; padding: 2px 6px; border-radius: 8px;
+  background: var(--amber-bg); color: var(--amber-text);
+  font-weight: 600; white-space: nowrap;
+}
 
 .pts { font-weight: 700; font-size: 16px; }
 .pts.leader { color: #0d9260; }
 .stat { font-size: 13px; color: var(--text-secondary); }
+.mrs-score { font-weight: 700; font-size: 14px; color: var(--blue-text); }
 
 .badge { font-size: 11px; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
 .badge.solo { background: var(--blue-bg); color: var(--blue-text); }
 .badge.team { background: var(--green-bg); color: var(--green-text); }
-.badge.deleted-badge { background: var(--red-bg); color: var(--red-text); }
 
-.empty-state {
-  text-align: center; padding: 3.5rem 1.5rem;
-  color: var(--text-secondary); font-size: 14px; line-height: 1.8;
+/* HISTORY */
+.history-section { padding: 0.5rem 1.5rem 1.5rem; }
+.history-item {
+  padding: 11px 0; border-bottom: 0.5px solid var(--border);
+  font-size: 13px; display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 12px;
 }
-.empty-state i { font-size: 40px; display: block; margin-bottom: 12px; color: var(--text-tertiary); }
+.history-item:last-child { border-bottom: none; }
+.history-winner { font-weight: 600; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.history-rankings { color: var(--text-secondary); font-size: 12px; margin-top: 3px; display: flex; flex-direction: column; gap: 2px; }
+.history-rank-row { display: flex; align-items: center; gap: 5px; }
+.history-date { color: var(--text-tertiary); font-size: 12px; white-space: nowrap; margin-top: 2px; }
+.history-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.history-actions { display: flex; gap: 6px; }
+.no-history { text-align: center; padding: 3rem; color: var(--text-tertiary); font-size: 13px; }
+.no-history i { font-size: 28px; display: block; margin-bottom: 8px; }
 
+/* DELETED */
+.deleted-info {
+  margin: 0.75rem 1.5rem 0;
+  padding: 10px 14px; background: var(--red-bg);
+  border-radius: var(--radius-md); font-size: 12px;
+  color: var(--red-text); display: flex; align-items: center; gap: 8px;
+}
+.deleted-by { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+/* MODALS */
 .modal-bg {
   position: fixed; inset: 0; background: rgba(0,0,0,0.45);
   display: flex; align-items: center; justify-content: center;
-  z-index: 100; padding: 1rem;
-  animation: fadeIn 0.15s ease;
+  z-index: 100; padding: 1rem; animation: fadeIn 0.15s ease;
 }
 .modal {
   background: var(--bg); border-radius: var(--radius-xl);
@@ -269,6 +296,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
   width: 380px; max-width: 100%;
   box-shadow: 0 12px 48px rgba(0,0,0,0.2);
   animation: slideDown 0.2s ease;
+  max-height: 90vh; overflow-y: auto;
 }
 .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 1rem; }
 .modal label {
@@ -286,6 +314,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 .modal input:focus, .modal select:focus { border-color: var(--text); }
 .modal-actions { display: flex; gap: 8px; margin-top: 1.5rem; justify-content: flex-end; }
 
+/* CHIPS */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .chip {
   padding: 6px 12px; border-radius: 20px;
@@ -297,37 +326,75 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 .chip:hover { background: var(--bg-secondary); }
 .chip:active { transform: scale(0.96); }
 .chip.selected { background: var(--text); color: var(--bg); border-color: var(--text); }
+.chip.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
 
-/* HISTORY & DELETED SHARED */
-.history-section { padding: 0.5rem 1.5rem 1.5rem; }
-.history-item {
-  padding: 11px 0; border-bottom: 0.5px solid var(--border);
-  font-size: 13px; display: flex; justify-content: space-between;
-  align-items: flex-start; gap: 12px;
+/* RANKING UI */
+.rank-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.rank-slot {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: var(--radius-md);
+  border: 0.5px solid var(--border-md);
+  background: var(--bg-secondary); font-size: 13px;
 }
-.history-item:last-child { border-bottom: none; }
-.history-winner { font-weight: 600; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.history-also { color: var(--text-secondary); font-size: 12px; }
-.history-date { color: var(--text-tertiary); font-size: 12px; white-space: nowrap; margin-top: 2px; }
-.history-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-.history-actions { display: flex; gap: 6px; }
-.no-history { text-align: center; padding: 3rem; color: var(--text-tertiary); font-size: 13px; }
-.no-history i { font-size: 28px; display: block; margin-bottom: 8px; }
+.rank-slot-pos {
+  font-size: 11px; font-weight: 700; color: var(--text-secondary);
+  min-width: 28px; text-align: center;
+}
+.rank-slot-pos.gold-pos   { color: var(--gold); }
+.rank-slot-pos.silver-pos { color: var(--silver); }
+.rank-slot-pos.bronze-pos { color: var(--bronze); }
+.rank-slot-name { flex: 1; font-weight: 500; color: var(--text-secondary); font-style: italic; }
+.rank-slot-name.filled { color: var(--text); font-style: normal; font-weight: 600; }
+.rank-slot-pts {
+  font-size: 11px; padding: 2px 7px; border-radius: 8px;
+  background: var(--bg-tertiary); color: var(--text-secondary);
+  font-weight: 600; white-space: nowrap;
+}
+.rank-slot-pts.earned { background: var(--green-bg); color: var(--green-text); }
+.rank-slot-remove {
+  font-size: 11px; color: var(--text-tertiary); cursor: pointer;
+  padding: 2px 5px; border-radius: 4px; border: none;
+  background: none; font-family: inherit;
+  transition: background 0.1s, color 0.1s;
+}
+.rank-slot-remove:hover { background: var(--red-bg); color: var(--red-text); }
 
-/* deleted section info banner */
-.deleted-info {
-  margin: 0.75rem 1.5rem 0;
-  padding: 10px 14px;
-  background: var(--red-bg);
-  border-radius: var(--radius-md);
-  font-size: 12px;
-  color: var(--red-text);
-  display: flex; align-items: center; gap: 8px;
+.team-block { margin-top: 10px; }
+.team-block-label {
+  font-size: 11px; font-weight: 700; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: 5px; display: flex; align-items: center; gap: 6px;
 }
-.deleted-by {
-  font-size: 11px; color: var(--text-tertiary); margin-top: 2px;
+.team-rank-badge {
+  font-size: 10px; padding: 1px 6px; border-radius: 6px;
+  background: var(--bg-tertiary); color: var(--text-tertiary); font-weight: 600;
+}
+.team-rank-badge.t1 { background: var(--amber-bg); color: var(--amber-text); }
+.team-rank-badge.t2 { background: var(--blue-bg); color: var(--blue-text); }
+.team-rank-badge.t3 { background: var(--red-bg); color: var(--red-text); }
+
+.divider { height: 0.5px; background: var(--border); margin: 14px 0; }
+.step-label {
+  font-size: 11px; font-weight: 700; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: 6px; margin-top: 16px;
+  display: flex; align-items: center; gap: 6px;
+}
+.step-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--bg-tertiary); color: var(--text-secondary);
+  font-size: 10px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
 }
 
+/* EMPTY */
+.empty-state {
+  text-align: center; padding: 3.5rem 1.5rem;
+  color: var(--text-secondary); font-size: 14px; line-height: 1.8;
+}
+.empty-state i { font-size: 40px; display: block; margin-bottom: 12px; color: var(--text-tertiary); }
+
+/* TOAST */
 .toast {
   position: fixed; bottom: 1.5rem; left: 50%;
   transform: translateX(-50%) translateY(20px);
@@ -338,6 +405,88 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
   z-index: 200; white-space: nowrap; pointer-events: none;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── RULES TAB ─────────────────────────────────────────── */
+.rules-section { padding: 1.25rem 1.5rem 2rem; }
+
+.rules-hero {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 14px;
+}
+.rules-hero-icon { font-size: 36px; line-height: 1; flex-shrink: 0; }
+.rules-hero-text h2 { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.rules-hero-text p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+.rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .rules-grid { grid-template-columns: 1fr; } }
+
+.rules-card {
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.25rem;
+}
+.rules-card-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+.rules-card-icon {
+  width: 30px; height: 30px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.rules-card-title { font-size: 13px; font-weight: 700; }
+.rules-card-subtitle { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+
+.rules-card.full-width { grid-column: 1 / -1; }
+
+/* point table inside rules */
+.pts-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px; }
+.pts-table th {
+  text-align: left; padding: 5px 8px;
+  font-size: 10px; font-weight: 600; color: var(--text-tertiary);
+  text-transform: uppercase; letter-spacing: 0.04em; border: none;
+}
+.pts-table td { padding: 6px 8px; border-top: 0.5px solid var(--border); color: var(--text); }
+.pts-table td:last-child { text-align: right; font-weight: 700; }
+.pts-table .place-cell { display: flex; align-items: center; gap: 6px; }
+.pts-highlight { color: #0d9260; }
+
+/* MRS formula display */
+.mrs-formula {
+  background: var(--bg);
+  border: 0.5px solid var(--border-md);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-size: 12px; margin-top: 8px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  line-height: 1.9; color: var(--text-secondary);
+}
+.mrs-formula .f-highlight { color: var(--text); font-weight: 600; }
+.mrs-formula .f-op { color: var(--blue-text); }
+
+/* rule list */
+.rule-list { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+.rule-list li {
+  font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+  display: flex; gap: 7px; align-items: flex-start;
+}
+.rule-list li::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--text-tertiary); flex-shrink: 0; margin-top: 5px;
+}
+.rule-list li strong { color: var(--text); }
+
+.rules-footer {
+  margin-top: 1.25rem; padding: 10px 14px;
+  background: var(--amber-bg); border-radius: var(--radius-md);
+  font-size: 12px; color: var(--amber-text);
+  display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;
+}
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>
@@ -358,11 +507,13 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
     </div>
 
     <div class="tabs">
-      <button class="tab active" data-tab="table" onclick="switchTab('table')">Table</button>
-      <button class="tab" data-tab="history" onclick="switchTab('history')">Game history</button>
-      <button class="tab" data-tab="deleted" onclick="switchTab('deleted')">Deleted games <span class="tab-badge" id="deleted-badge" style="display:none">0</span></button>
+      <button class="tab active" data-tab="table"   onclick="switchTab('table')">Table</button>
+      <button class="tab"        data-tab="history" onclick="switchTab('history')">Game history</button>
+      <button class="tab"        data-tab="deleted" onclick="switchTab('deleted')">Deleted games <span class="tab-badge" id="deleted-badge" style="display:none">0</span></button>
+      <button class="tab"        data-tab="rules"   onclick="switchTab('rules')">📋 Rules</button>
     </div>
 
+    <!-- TABLE TAB -->
     <div id="tab-table">
       <div class="table-wrap">
         <table>
@@ -372,10 +523,9 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
               <th style="width:22px"></th>
               <th>Player</th>
               <th class="num">Played</th>
-              <th class="num">Solo wins</th>
-              <th class="num">Team wins</th>
+              <th class="num">Pts</th>
               <th class="num">Win %</th>
-              <th class="num">Points</th>
+              <th class="num" title="Monopoly Rating Score">MRS ↑</th>
               <th style="width:44px"></th>
             </tr>
           </thead>
@@ -384,16 +534,160 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
       </div>
     </div>
 
+    <!-- HISTORY TAB -->
     <div id="tab-history" style="display:none">
       <div class="history-section" id="history-list"></div>
     </div>
 
+    <!-- DELETED TAB -->
     <div id="tab-deleted" style="display:none">
       <div class="deleted-info">
         <i class="ti ti-info-circle"></i>
         Games deleted by anyone in the league are kept here. Use Restore to bring a game back.
       </div>
       <div class="history-section" id="deleted-list"></div>
+    </div>
+
+    <!-- RULES TAB -->
+    <div id="tab-rules" style="display:none">
+      <div class="rules-section">
+
+        <div class="rules-hero">
+          <div class="rules-hero-icon">🎩</div>
+          <div class="rules-hero-text">
+            <h2>Monopoly League — Official Rules</h2>
+            <p>How points are earned, how players are ranked, and what keeps the league fair. Read before you play.</p>
+          </div>
+        </div>
+
+        <div class="rules-grid">
+
+          <!-- SOLO POINTS -->
+          <div class="rules-card">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--blue-bg)">🏅</div>
+              <div>
+                <div class="rules-card-title">Solo Game Points</div>
+                <div class="rules-card-subtitle">Every player is ranked by elimination order</div>
+              </div>
+            </div>
+            <table class="pts-table">
+              <thead><tr><th>Place</th><th>Points</th></tr></thead>
+              <tbody>
+                <tr><td><div class="place-cell">👑 1st place</div></td><td class="pts-highlight">6 pts</td></tr>
+                <tr><td><div class="place-cell">🥈 2nd place</div></td><td>4 pts</td></tr>
+                <tr><td><div class="place-cell">🥉 3rd place</div></td><td>3 pts</td></tr>
+                <tr><td><div class="place-cell">4th place</div></td><td>2 pts</td></tr>
+                <tr><td><div class="place-cell">5th place</div></td><td>1 pt</td></tr>
+                <tr><td><div class="place-cell">6th place</div></td><td>0 pts</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- TEAM POINTS -->
+          <div class="rules-card">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--green-bg)">🤝</div>
+              <div>
+                <div class="rules-card-title">Team Game Points</div>
+                <div class="rules-card-subtitle">Points split equally between teammates</div>
+              </div>
+            </div>
+            <table class="pts-table">
+              <thead><tr><th>Finish</th><th>Per player</th></tr></thead>
+              <tbody>
+                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">4 pts</td></tr>
+                <tr><td><div class="place-cell">🥈 2nd team</div></td><td>2 pts</td></tr>
+                <tr><td><div class="place-cell">🥉 3rd team</div></td><td>0 pts</td></tr>
+              </tbody>
+            </table>
+            <ul class="rule-list" style="margin-top:10px">
+              <li>Solo 1st (6pts) is always worth more than Team 1st (4pts) — solo wins are harder.</li>
+              <li>Finishing 2nd solo (4pts) equals winning as a team (4pts).</li>
+            </ul>
+          </div>
+
+          <!-- MRS RANKING -->
+          <div class="rules-card full-width">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--blue-bg)">📊</div>
+              <div>
+                <div class="rules-card-title">Monopoly Rating Score (MRS)</div>
+                <div class="rules-card-subtitle">The number used to rank players — not raw points</div>
+              </div>
+            </div>
+            <div class="mrs-formula">
+              <span class="f-highlight">MRS</span> <span class="f-op">=</span>
+              (<span class="f-highlight">adjustedWinRate</span> <span class="f-op">×</span> 100)
+              <span class="f-op">+</span> (<span class="f-highlight">points</span> <span class="f-op">×</span> 0.5)
+              <span class="f-op">+</span> (log(<span class="f-highlight">games + 1</span>) <span class="f-op">×</span> 2)
+              <span class="f-op">+</span> (<span class="f-highlight">soloWins</span> <span class="f-op">×</span> 0.3)
+            </div>
+            <ul class="rule-list" style="margin-top:10px">
+              <li><strong>Adjusted win rate</strong> — uses a Bayesian smoothing formula that adds ~5 phantom "average" games to your record. This prevents a player with 1 win from 1 game from claiming a 100% win rate above someone with 8 wins from 10 games.</li>
+              <li><strong>Points factor</strong> — raw points still matter as a secondary signal, rewarding players who consistently score high finishes.</li>
+              <li><strong>Volume bonus</strong> — playing more games helps your MRS, but with logarithmic diminishing returns. Playing 50 games doesn't dominate over someone with 15.</li>
+              <li><strong>Solo win bonus</strong> — a small extra reward for each solo win, since they're harder to achieve than team wins.</li>
+            </ul>
+          </div>
+
+          <!-- PROVISIONAL -->
+          <div class="rules-card">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--amber-bg)">⚠️</div>
+              <div>
+                <div class="rules-card-title">Provisional Players</div>
+                <div class="rules-card-subtitle">Fewer than 5 games played</div>
+              </div>
+            </div>
+            <ul class="rule-list">
+              <li>Players with <strong>fewer than 5 games</strong> are marked <span class="provisional-badge">Provisional</span> in the table.</li>
+              <li>They are ranked by the same MRS formula — the Bayesian adjustment naturally keeps outlier win rates in check.</li>
+              <li>The badge disappears automatically once 5 games are logged.</li>
+            </ul>
+          </div>
+
+          <!-- RELEGATION -->
+          <div class="rules-card">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--red-bg)">📉</div>
+              <div>
+                <div class="rules-card-title">Relegation Zone</div>
+                <div class="rules-card-subtitle">Applies when 4+ players are in the league</div>
+              </div>
+            </div>
+            <ul class="rule-list">
+              <li>The <strong>bottom 2 players</strong> are highlighted in red — this is the relegation zone.</li>
+              <li>It's a visual warning only, not a hard penalty — use it to motivate a comeback.</li>
+              <li>Relegation zone only activates with <strong>4 or more players</strong> in the league.</li>
+            </ul>
+          </div>
+
+          <!-- GAME LOGGING -->
+          <div class="rules-card full-width">
+            <div class="rules-card-header">
+              <div class="rules-card-icon" style="background:var(--green-bg)">📝</div>
+              <div>
+                <div class="rules-card-title">Logging a Game</div>
+                <div class="rules-card-subtitle">How to record results correctly</div>
+              </div>
+            </div>
+            <ul class="rule-list">
+              <li><strong>Solo games:</strong> Select all players who played, then assign finishing positions in bankruptcy order — 1st is the winner (last standing), last is the first person eliminated.</li>
+              <li><strong>Team games:</strong> Choose the number of teams and players per team, assign players to each team, then rank the teams by finishing order. All teammates share the same points.</li>
+              <li><strong>Everyone must be ranked.</strong> There are no "also played" participants — if you played, you get a finishing position.</li>
+              <li>Games are logged with today's date automatically. Mistakes can be deleted and moved to the <strong>Deleted games</strong> tab where they can be reviewed or restored.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="rules-footer">
+          <i class="ti ti-pencil" style="margin-top:1px;flex-shrink:0"></i>
+          <span>Rules are maintained by the league admin. If you think something needs changing, reach out — don't edit game logs to work around the system.</span>
+        </div>
+
+      </div>
     </div>
 
   </div>
@@ -417,24 +711,58 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 <!-- Log Game -->
 <div id="modal-log" style="display:none">
   <div class="modal-bg" onclick="closeModals()">
-    <div class="modal" style="width:440px" onclick="event.stopPropagation()">
+    <div class="modal" style="width:460px" onclick="event.stopPropagation()">
       <h2>Log game result</h2>
-      <label>Game type</label>
-      <select id="log-type" onchange="updateGameTypeUI()">
-        <option value="solo">Solo game — winner gets 2 pts</option>
-        <option value="team">Team game — each winner gets 1 pt</option>
+
+      <!-- Step 1: game type -->
+      <div class="step-label"><span class="step-num">1</span> Game type</div>
+      <select id="log-type" onchange="updateLogUI()">
+        <option value="solo">Solo game</option>
+        <option value="team">Team game</option>
       </select>
-      <div id="team-size-row" style="display:none">
-        <label>Players per team</label>
-        <select id="team-size">
-          <option value="2">2 players per team</option>
-          <option value="3">3 players per team</option>
-        </select>
+
+      <!-- team config (only team) -->
+      <div id="team-config" style="display:none">
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <div style="flex:1">
+            <label>Number of teams</label>
+            <select id="num-teams" onchange="updateLogUI()">
+              <option value="2">2 teams</option>
+              <option value="3">3 teams</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <label>Players per team</label>
+            <select id="team-size" onchange="updateLogUI()">
+              <option value="2">2 players</option>
+              <option value="3">3 players</option>
+            </select>
+          </div>
+        </div>
       </div>
-      <label id="winner-label">Winner</label>
-      <div class="chips" id="winner-chips"></div>
-      <label>Other participants <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional — tracks games played)</span></label>
-      <div class="chips" id="loser-chips"></div>
+
+      <!-- Step 2: select players / assign teams -->
+      <div id="step2-solo">
+        <div class="step-label"><span class="step-num">2</span> Who played?</div>
+        <div class="chips" id="player-chips"></div>
+      </div>
+
+      <div id="step2-team" style="display:none">
+        <div class="step-label"><span class="step-num">2</span> Assign players to teams</div>
+        <div id="team-assign-ui"></div>
+      </div>
+
+      <!-- Step 3: rank -->
+      <div id="step3-solo">
+        <div class="step-label"><span class="step-num">3</span> Rank finishing positions <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-tertiary)">(1st = last standing)</span></div>
+        <div class="rank-list" id="solo-rank-list"></div>
+      </div>
+
+      <div id="step3-team" style="display:none">
+        <div class="step-label"><span class="step-num">3</span> Rank teams <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-tertiary)">(drag or click to assign)</span></div>
+        <div class="rank-list" id="team-rank-list"></div>
+      </div>
+
       <div class="modal-actions">
         <button onclick="closeModals()">Cancel</button>
         <button class="primary" onclick="confirmLogGame()"><i class="ti ti-check"></i> Log game</button>
@@ -457,7 +785,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
   </div>
 </div>
 
-<!-- Delete Game confirmation -->
+<!-- Delete Game -->
 <div id="modal-delete-game" style="display:none">
   <div class="modal-bg" onclick="closeModals()">
     <div class="modal" onclick="event.stopPropagation()">
@@ -478,6 +806,15 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 <div class="toast" id="toast"></div>
 
 <script>
+// ── POINT TABLES ─────────────────────────────────────────────────────────────
+const SOLO_PTS  = [6, 4, 3, 2, 1, 0]; // index 0 = 1st place
+const TEAM_PTS  = [4, 2, 0];           // index 0 = 1st team
+
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const PROVISIONAL_THRESHOLD = 5;
+const BAYESIAN_K = 5;        // phantom games for win rate smoothing
+const AVG_WIN_RATE = 0.30;   // assumed league average win rate for Bayesian prior
+
 const AVATAR_COLORS = [
   ['#DBEAFE','#1e40af'],['#D1FAE5','#065f46'],['#FEF3C7','#92400e'],
   ['#FCE7F3','#9d174d'],['#E0E7FF','#3730a3'],['#FEE2E2','#991b1b'],
@@ -490,48 +827,64 @@ let games = [];
 let deletedGames = [];
 let removeTarget = null;
 let deleteGameTarget = null;
-let selectedWinners = [];
-let selectedLosers = [];
 let prevRanks = {};
 
+// log game state
+let logSelectedPlayers = []; // solo: ordered array of player ids (index = rank)
+let teamAssignments = [];    // team: array of arrays [[pid,pid],[pid,pid]]
+let teamRankOrder = [];      // team: [0,1,2] = team indices in finishing order
+
+// ── SAVE / LOAD ───────────────────────────────────────────────────────────────
 function save() {
   const payload = { players, games, deletedGames };
   window._lastSaved = JSON.stringify(payload);
   if (window._fbSave) window._fbSave(players, games, deletedGames);
 }
 
+// ── HELPERS ───────────────────────────────────────────────────────────────────
 function getInitials(name) {
   return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
 }
 
 function getStats(pid) {
-  let gp=0, pts=0, sw=0, tw=0;
+  let gp=0, pts=0, wins=0, soloWins=0;
   for (const g of games) {
-    const inW = g.winners.includes(pid);
-    const inL = g.losers && g.losers.includes(pid);
-    if (inW||inL) gp++;
-    if (inW) {
-      if (g.type==='solo') { pts+=2; sw++; }
-      else { pts+=1; tw++; }
+    const rank = g.rankings ? g.rankings.findIndex(r => Array.isArray(r) ? r.includes(pid) : r === pid) : -1;
+    const inGame = rank !== -1;
+    if (!inGame) continue;
+    gp++;
+    if (g.type === 'solo') {
+      const p = SOLO_PTS[rank] ?? 0;
+      pts += p;
+      if (rank === 0) { wins++; soloWins++; }
+    } else {
+      const p = TEAM_PTS[rank] ?? 0;
+      pts += p;
+      if (rank === 0) wins++;
     }
   }
-  const totalWins = sw + tw;
-  const winPct = gp > 0 ? Math.round((totalWins / gp) * 100) : null;
-  return {gp,pts,sw,tw,totalWins,winPct};
+  const rawWinRate = gp > 0 ? wins / gp : 0;
+  const adjustedWinRate = (wins + BAYESIAN_K * AVG_WIN_RATE) / (gp + BAYESIAN_K);
+  const mrs = computeMRS(adjustedWinRate, pts, gp, soloWins);
+  return { gp, pts, wins, soloWins, rawWinRate, adjustedWinRate, mrs };
+}
+
+function computeMRS(adjWR, pts, gp, soloWins) {
+  return (adjWR * 100) + (pts * 0.5) + (Math.log(gp + 1) * 2) + (soloWins * 0.3);
 }
 
 function getRanked() {
-  return players.map(p=>({...p,...getStats(p.id)}))
-    .sort((a,b)=>{
+  return players
+    .map(p => ({ ...p, ...getStats(p.id) }))
+    .sort((a, b) => {
       if (a.gp === 0 && b.gp === 0) return a.name.localeCompare(b.name);
       if (a.gp === 0) return 1;
       if (b.gp === 0) return -1;
-      const pctDiff = (b.winPct ?? 0) - (a.winPct ?? 0);
-      if (pctDiff !== 0) return pctDiff;
-      return b.pts - a.pts || b.gp - a.gp || a.name.localeCompare(b.name);
+      return b.mrs - a.mrs || a.name.localeCompare(b.name);
     });
 }
 
+// ── BADGE ─────────────────────────────────────────────────────────────────────
 function updateDeletedBadge() {
   const badge = document.getElementById('deleted-badge');
   if (deletedGames.length > 0) {
@@ -542,12 +895,13 @@ function updateDeletedBadge() {
   }
 }
 
+// ── RENDER TABLE ──────────────────────────────────────────────────────────────
 function renderTable() {
   const body = document.getElementById('leaderboard-body');
   updateDeletedBadge();
 
   if (!players.length) {
-    body.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="ti ti-users"></i>No players yet.<br>Hit "Add player" to get started.</div></td></tr>`;
+    body.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="ti ti-users"></i>No players yet.<br>Hit "Add player" to get started.</div></td></tr>`;
     document.getElementById('subtitle').textContent = '0 players · 0 games played';
     prevRanks = {};
     return;
@@ -556,23 +910,16 @@ function renderTable() {
   const ranked = getRanked();
   const total = ranked.length;
   const relegZone = total >= 4 ? 2 : 0;
+  const relegStartPos = total - relegZone + 1;
 
   document.getElementById('subtitle').textContent =
     `${total} player${total!==1?'s':''} · ${games.length} game${games.length!==1?'s':''} played`;
 
   let html = '';
-  const relegStartPos = total - relegZone + 1;
-
   ranked.forEach((p, i) => {
     const pos = i + 1;
     const prev = prevRanks[p.id];
-    let animClass = '';
-    if (prev !== undefined) {
-      if (pos < prev) animClass = ' anim-down';
-      else if (pos > prev) animClass = ' anim-up';
-    } else {
-      animClass = ' anim-in';
-    }
+    let animClass = prev === undefined ? ' anim-in' : pos < prev ? ' anim-down' : pos > prev ? ' anim-up' : '';
 
     let trendHtml = '';
     if (prev !== undefined) {
@@ -583,44 +930,37 @@ function renderTable() {
     }
 
     let posHtml = '';
-    if (pos === 1) posHtml = `<span class="crown gold" title="1st place">👑</span>`;
-    else if (pos === 2) posHtml = `<span class="crown silver" title="2nd place" style="font-size:17px">🥈</span>`;
-    else if (pos === 3) posHtml = `<span class="crown bronze" title="3rd place" style="font-size:17px">🥉</span>`;
-    else posHtml = `<span class="pos-num">${pos}</span>`;
+    if (pos===1) posHtml=`<span class="crown gold">👑</span>`;
+    else if (pos===2) posHtml=`<span class="crown silver" style="font-size:17px">🥈</span>`;
+    else if (pos===3) posHtml=`<span class="crown bronze" style="font-size:17px">🥉</span>`;
+    else posHtml=`<span class="pos-num">${pos}</span>`;
 
     const [bg, fg] = AVATAR_COLORS[p.colorIdx % AVATAR_COLORS.length];
-    const ptsClass = pos===1 && p.pts>0 ? 'pts leader' : 'pts';
-
-    let winPctHtml = '—';
-    if (p.winPct !== null) {
-      let pctColor = 'var(--text-secondary)';
-      if (p.winPct >= 60) pctColor = '#16a34a';
-      else if (p.winPct >= 40) pctColor = '#ca8a04';
-      else pctColor = 'var(--relegation)';
-      winPctHtml = `<span style="font-weight:600;color:${pctColor}">${p.winPct}%</span>`;
-    }
-
+    const isProvisional = p.gp < PROVISIONAL_THRESHOLD && p.gp > 0;
     const isRelegBorder = relegZone > 0 && pos === relegStartPos;
-    const isRelegRow = relegZone > 0 && pos >= relegStartPos;
-    let rowClass = animClass;
-    if (isRelegRow) rowClass += ' relegation-row';
+    const isRelegRow    = relegZone > 0 && pos >= relegStartPos;
+    let rowClass = animClass + (isRelegRow ? ' relegation-row' : '');
+    const ci = isRelegBorder ? ' relegation-border' : '';
+
+    const winPctDisplay = p.gp > 0 ? `${Math.round(p.rawWinRate * 100)}%` : '—';
+    const mrsDisplay = p.gp > 0 ? p.mrs.toFixed(1) : '—';
 
     html += `<tr class="${rowClass.trim()}">
-      <td><div class="cell-inner${isRelegBorder?' relegation-border':''}"><div class="pos-wrap">${posHtml}</div></div></td>
-      <td><div class="cell-inner${isRelegBorder?' relegation-border':''}">${trendHtml}</div></td>
-      <td><div class="cell-inner${isRelegBorder?' relegation-border':''}">
+      <td><div class="cell-inner${ci}"><div class="pos-wrap">${posHtml}</div></div></td>
+      <td><div class="cell-inner${ci}">${trendHtml}</div></td>
+      <td><div class="cell-inner${ci}">
         <span class="player-name">
           <span class="avatar" style="background:${bg};color:${fg}">${getInitials(p.name)}</span>
           ${p.name}
-          ${pos===1&&p.pts>0?'<span style="font-size:11px;background:#fef9ec;color:#92400e;padding:2px 7px;border-radius:10px;font-weight:600;margin-left:4px">Leader</span>':''}
+          ${pos===1&&p.pts>0?'<span style="font-size:11px;background:#fef9ec;color:#92400e;padding:2px 7px;border-radius:10px;font-weight:600">Leader</span>':''}
+          ${isProvisional?'<span class="provisional-badge">Provisional</span>':''}
         </span>
       </div></td>
-      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}"><span class="stat">${p.gp}</span></div></td>
-      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}"><span class="stat">${p.sw}</span></div></td>
-      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}"><span class="stat">${p.tw}</span></div></td>
-      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}">${winPctHtml}</div></td>
-      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}"><span class="${ptsClass}">${p.pts}</span></div></td>
-      <td class="num"><div class="cell-inner${isRelegBorder?' relegation-border':''}">
+      <td class="num"><div class="cell-inner${ci}"><span class="stat">${p.gp}</span></div></td>
+      <td class="num"><div class="cell-inner${ci}"><span class="pts${pos===1&&p.pts>0?' leader':''}">${p.pts}</span></div></td>
+      <td class="num"><div class="cell-inner${ci}"><span class="stat">${winPctDisplay}</span></div></td>
+      <td class="num"><div class="cell-inner${ci}"><span class="mrs-score">${mrsDisplay}</span></div></td>
+      <td class="num"><div class="cell-inner${ci}">
         <button class="danger" onclick="openRemove('${p.id}','${p.name.replace(/'/g,"\\'")}')"><i class="ti ti-trash"></i></button>
       </div></td>
     </tr>`;
@@ -643,27 +983,36 @@ function renderTable() {
   }
 }
 
+// ── RENDER HISTORY ────────────────────────────────────────────────────────────
+function placeEmoji(i) { return ['👑','🥈','🥉','4️⃣','5️⃣','6️⃣'][i] || `${i+1}.`; }
+
 function renderHistory() {
   const el = document.getElementById('history-list');
-  if (!games.length) {
-    el.innerHTML = '<div class="no-history"><i class="ti ti-history"></i>No games logged yet.</div>';
-    return;
-  }
+  if (!games.length) { el.innerHTML = '<div class="no-history"><i class="ti ti-history"></i>No games logged yet.</div>'; return; }
   const sorted = [...games].reverse();
   let html = '';
   sorted.forEach(g => {
-    const wNames = g.winners.map(id=>players.find(p=>p.id===id)?.name||'?').join(', ');
-    const lNames = g.losers&&g.losers.length ? g.losers.map(id=>players.find(p=>p.id===id)?.name||'?').join(', ') : null;
     const badge = g.type==='solo'
-      ? `<span class="badge solo">Solo +2pts</span>`
-      : `<span class="badge team">Team +1pt</span>`;
+      ? `<span class="badge solo">Solo</span>`
+      : `<span class="badge team">Team</span>`;
+    let rankingsHtml = '';
+    if (g.rankings && g.rankings.length) {
+      rankingsHtml = '<div class="history-rankings">';
+      g.rankings.forEach((slot, i) => {
+        const names = Array.isArray(slot)
+          ? slot.map(id => players.find(p=>p.id===id)?.name || '?').join(' & ')
+          : (players.find(p=>p.id===slot)?.name || '?');
+        const pts = g.type === 'solo' ? (SOLO_PTS[i] ?? 0) : (TEAM_PTS[i] ?? 0);
+        rankingsHtml += `<div class="history-rank-row">${placeEmoji(i)} ${names} <span style="color:var(--text-tertiary);font-size:11px">+${pts}pt${pts!==1?'s':''}</span></div>`;
+      });
+      rankingsHtml += '</div>';
+    }
     html += `<div class="history-item">
       <div>
-        <div class="history-winner">🏆 ${wNames} won ${badge}</div>
-        ${lNames?`<div class="history-also">Also played: ${lNames}</div>`:''}
+        <div class="history-winner">${badge} ${g.date}</div>
+        ${rankingsHtml}
       </div>
       <div class="history-meta">
-        <div class="history-date">${g.date}</div>
         <div class="history-actions">
           <button class="danger" onclick="openDeleteGame('${g.id}')" title="Delete game"><i class="ti ti-trash"></i></button>
         </div>
@@ -673,49 +1022,55 @@ function renderHistory() {
   el.innerHTML = html;
 }
 
+// ── RENDER DELETED ────────────────────────────────────────────────────────────
 function renderDeleted() {
   const el = document.getElementById('deleted-list');
   updateDeletedBadge();
-  if (!deletedGames.length) {
-    el.innerHTML = '<div class="no-history"><i class="ti ti-circle-check"></i>No deleted games — everything looks clean.</div>';
-    return;
-  }
+  if (!deletedGames.length) { el.innerHTML = '<div class="no-history"><i class="ti ti-circle-check"></i>No deleted games — everything looks clean.</div>'; return; }
   const sorted = [...deletedGames].reverse();
   let html = '';
   sorted.forEach(g => {
-    const wNames = g.winners.map(id=>players.find(p=>p.id===id)?.name||'?').join(', ');
-    const lNames = g.losers&&g.losers.length ? g.losers.map(id=>players.find(p=>p.id===id)?.name||'?').join(', ') : null;
     const badge = g.type==='solo'
-      ? `<span class="badge solo">Solo +2pts</span>`
-      : `<span class="badge team">Team +1pt</span>`;
+      ? `<span class="badge solo">Solo</span>`
+      : `<span class="badge team">Team</span>`;
+    let rankingsHtml = '';
+    if (g.rankings && g.rankings.length) {
+      rankingsHtml = '<div class="history-rankings" style="opacity:0.6">';
+      g.rankings.forEach((slot, i) => {
+        const names = Array.isArray(slot)
+          ? slot.map(id => players.find(p=>p.id===id)?.name || '?').join(' & ')
+          : (players.find(p=>p.id===slot)?.name || '?');
+        rankingsHtml += `<div class="history-rank-row">${placeEmoji(i)} ${names}</div>`;
+      });
+      rankingsHtml += '</div>';
+    }
     const deletedBy = g.deletedBy ? `Deleted by ${g.deletedBy}` : 'Deleted';
     const deletedAt = g.deletedAt ? ` · ${g.deletedAt}` : '';
     html += `<div class="history-item">
       <div>
-        <div class="history-winner" style="opacity:0.6">🏆 ${wNames} won ${badge}</div>
-        ${lNames?`<div class="history-also">Also played: ${lNames}</div>`:''}
+        <div class="history-winner" style="opacity:0.6">${badge} ${g.date}</div>
+        ${rankingsHtml}
         <div class="deleted-by"><i class="ti ti-trash" style="font-size:10px"></i> ${deletedBy}${deletedAt}</div>
       </div>
       <div class="history-meta">
-        <div class="history-date">${g.date}</div>
-        <div class="history-actions">
-          <button class="restore" onclick="restoreGame('${g.id}')" title="Restore game"><i class="ti ti-arrow-back-up"></i> Restore</button>
-        </div>
+        <button class="restore" onclick="restoreGame('${g.id}')"><i class="ti ti-arrow-back-up"></i> Restore</button>
       </div>
     </div>`;
   });
   el.innerHTML = html;
 }
 
+// ── SWITCH TAB ────────────────────────────────────────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  document.getElementById('tab-table').style.display   = tab==='table'   ? '' : 'none';
-  document.getElementById('tab-history').style.display = tab==='history' ? '' : 'none';
-  document.getElementById('tab-deleted').style.display = tab==='deleted' ? '' : 'none';
+  ['table','history','deleted','rules'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? '' : 'none';
+  });
   if (tab==='history') renderHistory();
   if (tab==='deleted') renderDeleted();
 }
 
+// ── ADD PLAYER ────────────────────────────────────────────────────────────────
 function openAddPlayer() {
   document.getElementById('new-player-name').value='';
   document.getElementById('modal-add').style.display='';
@@ -731,6 +1086,7 @@ function confirmAddPlayer() {
   showToast(`${name} added to the league!`);
 }
 
+// ── REMOVE PLAYER ─────────────────────────────────────────────────────────────
 function openRemove(id, name) {
   removeTarget = id;
   document.getElementById('remove-name').textContent = name;
@@ -741,65 +1097,193 @@ function confirmRemovePlayer() {
   if (!removeTarget) return;
   const p = players.find(x=>x.id===removeTarget);
   players = players.filter(x=>x.id!==removeTarget);
-  games = games.filter(g=>!(g.winners.includes(removeTarget)||(g.losers&&g.losers.includes(removeTarget))));
+  games = games.filter(g => {
+    if (!g.rankings) return true;
+    return !g.rankings.some(slot => Array.isArray(slot) ? slot.includes(removeTarget) : slot===removeTarget);
+  });
   delete prevRanks[removeTarget];
   removeTarget = null;
   save(); closeModals(); renderTable();
   if (p) showToast(`${p.name} removed`);
 }
 
+// ── LOG GAME UI ───────────────────────────────────────────────────────────────
 function openLogGame() {
   if (!players.length) { showToast('Add a player first'); return; }
-  selectedWinners=[]; selectedLosers=[];
-  updateGameTypeUI();
+  logSelectedPlayers = [];
+  teamAssignments = [];
+  teamRankOrder = [];
+  document.getElementById('log-type').value = 'solo';
+  updateLogUI();
   document.getElementById('modal-log').style.display='';
 }
 
-function updateGameTypeUI() {
+function updateLogUI() {
   const type = document.getElementById('log-type').value;
-  document.getElementById('team-size-row').style.display = type==='team'?'':'none';
-  document.getElementById('winner-label').textContent = type==='solo'?'Winner':'Winning team';
-  selectedWinners=[]; selectedLosers=[];
-  renderChips();
-}
+  const isSolo = type === 'solo';
 
-function renderChips() {
-  const wc = document.getElementById('winner-chips');
-  const lc = document.getElementById('loser-chips');
-  wc.innerHTML = players.map(p=>`<button class="chip${selectedWinners.includes(p.id)?' selected':''}" onclick="toggleWinner('${p.id}')">${p.name}</button>`).join('');
-  lc.innerHTML = players.filter(p=>!selectedWinners.includes(p.id)).map(p=>`<button class="chip${selectedLosers.includes(p.id)?' selected':''}" onclick="toggleLoser('${p.id}')">${p.name}</button>`).join('');
-}
+  document.getElementById('team-config').style.display    = isSolo ? 'none' : '';
+  document.getElementById('step2-solo').style.display     = isSolo ? '' : 'none';
+  document.getElementById('step2-team').style.display     = isSolo ? 'none' : '';
+  document.getElementById('step3-solo').style.display     = isSolo ? '' : 'none';
+  document.getElementById('step3-team').style.display     = isSolo ? 'none' : '';
 
-function toggleWinner(id) {
-  const type = document.getElementById('log-type').value;
-  if (type==='solo') {
-    selectedWinners = selectedWinners.includes(id)?[]:[id];
+  logSelectedPlayers = [];
+  teamRankOrder = [];
+
+  if (isSolo) {
+    renderPlayerChips();
+    renderSoloRankList();
   } else {
-    const sz = parseInt(document.getElementById('team-size').value)||2;
-    if (selectedWinners.includes(id)) selectedWinners=selectedWinners.filter(x=>x!==id);
-    else if (selectedWinners.length<sz) selectedWinners.push(id);
-    else showToast(`Max ${sz} players per winning team`);
+    const numTeams = parseInt(document.getElementById('num-teams').value) || 2;
+    const teamSize = parseInt(document.getElementById('team-size').value) || 2;
+    // reset team assignments
+    teamAssignments = Array.from({length: numTeams}, () => []);
+    teamRankOrder = Array.from({length: numTeams}, (_, i) => i);
+    renderTeamAssignUI(numTeams, teamSize);
+    renderTeamRankList(numTeams);
   }
-  selectedLosers=selectedLosers.filter(x=>!selectedWinners.includes(x));
-  renderChips();
 }
 
-function toggleLoser(id) {
-  if (selectedLosers.includes(id)) selectedLosers=selectedLosers.filter(x=>x!==id);
-  else selectedLosers.push(id);
-  renderChips();
+// SOLO: player chip selection
+function renderPlayerChips() {
+  const el = document.getElementById('player-chips');
+  el.innerHTML = players.map(p => {
+    const sel = logSelectedPlayers.includes(p.id);
+    return `<button class="chip${sel?' selected':''}" onclick="toggleSoloPlayer('${p.id}')">${p.name}</button>`;
+  }).join('');
 }
 
+function toggleSoloPlayer(id) {
+  if (logSelectedPlayers.includes(id)) {
+    logSelectedPlayers = logSelectedPlayers.filter(x=>x!==id);
+  } else {
+    logSelectedPlayers.push(id);
+  }
+  renderPlayerChips();
+  renderSoloRankList();
+}
+
+// SOLO: rank slots — click a selected player to assign to next open slot
+function renderSoloRankList() {
+  const el = document.getElementById('solo-rank-list');
+  if (!logSelectedPlayers.length) { el.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:6px 0">Select players above to assign rankings</div>'; return; }
+  let html = '';
+  logSelectedPlayers.forEach((pid, i) => {
+    const p = players.find(x=>x.id===pid);
+    const pts = SOLO_PTS[i] ?? 0;
+    const posClass = i===0?'gold-pos':i===1?'silver-pos':i===2?'bronze-pos':'';
+    html += `<div class="rank-slot">
+      <span class="rank-slot-pos ${posClass}">${placeEmoji(i)}</span>
+      <span class="rank-slot-name filled">${p?.name||'?'}</span>
+      <span class="rank-slot-pts earned">+${pts}pt${pts!==1?'s':''}</span>
+      <button class="rank-slot-remove" onclick="removeSoloRank(${i})" title="Remove">✕</button>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function removeSoloRank(i) {
+  logSelectedPlayers.splice(i, 1);
+  renderPlayerChips();
+  renderSoloRankList();
+}
+
+// TEAM: assign players to teams
+function renderTeamAssignUI(numTeams, teamSize) {
+  const el = document.getElementById('team-assign-ui');
+  const assignedAll = [];
+  teamAssignments.forEach(t => t.forEach(id => assignedAll.push(id)));
+
+  let html = '';
+  for (let t = 0; t < numTeams; t++) {
+    const label = `Team ${String.fromCharCode(65+t)}`; // A, B, C
+    const slots = teamAssignments[t] || [];
+    html += `<div class="team-block">
+      <div class="team-block-label">${label} <span class="team-rank-badge">${slots.length}/${teamSize} players</span></div>
+      <div class="chips">
+        ${players.map(p => {
+          const inThisTeam = slots.includes(p.id);
+          const inOtherTeam = !inThisTeam && assignedAll.includes(p.id);
+          return `<button class="chip${inThisTeam?' selected':''}${inOtherTeam?' disabled':''}"
+            onclick="toggleTeamPlayer(${t},'${p.id}',${teamSize})">${p.name}</button>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function toggleTeamPlayer(teamIdx, pid, teamSize) {
+  const team = teamAssignments[teamIdx];
+  if (team.includes(pid)) {
+    teamAssignments[teamIdx] = team.filter(x=>x!==pid);
+  } else {
+    if (team.length >= teamSize) { showToast(`Team ${String.fromCharCode(65+teamIdx)} is full`); return; }
+    teamAssignments[teamIdx].push(pid);
+  }
+  const numTeams = parseInt(document.getElementById('num-teams').value) || 2;
+  renderTeamAssignUI(numTeams, teamSize);
+}
+
+// TEAM: rank teams
+function renderTeamRankList(numTeams) {
+  const el = document.getElementById('team-rank-list');
+  let html = '';
+  for (let rank = 0; rank < numTeams; rank++) {
+    const teamIdx = teamRankOrder[rank];
+    const teamName = `Team ${String.fromCharCode(65+teamIdx)}`;
+    const pts = TEAM_PTS[rank] ?? 0;
+    const posClass = rank===0?'gold-pos':rank===1?'silver-pos':rank===2?'bronze-pos':'';
+    const badgeClass = rank===0?'t1':rank===1?'t2':'t3';
+    html += `<div class="rank-slot">
+      <span class="rank-slot-pos ${posClass}">${placeEmoji(rank)}</span>
+      <span class="rank-slot-name filled"><span class="team-rank-badge ${badgeClass}">${teamName}</span></span>
+      <span class="rank-slot-pts earned">+${pts}pt${pts!==1?'s':''} each</span>
+      ${rank > 0 ? `<button class="rank-slot-remove" onclick="moveTeamUp(${rank})" title="Move up">↑</button>` : ''}
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function moveTeamUp(rank) {
+  const tmp = teamRankOrder[rank-1];
+  teamRankOrder[rank-1] = teamRankOrder[rank];
+  teamRankOrder[rank] = tmp;
+  const numTeams = parseInt(document.getElementById('num-teams').value) || 2;
+  renderTeamRankList(numTeams);
+}
+
+// ── CONFIRM LOG GAME ──────────────────────────────────────────────────────────
 function confirmLogGame() {
-  if (!selectedWinners.length) { showToast('Pick at least one winner'); return; }
   const type = document.getElementById('log-type').value;
   const date = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  games.push({id:'g'+Date.now(), type, winners:[...selectedWinners], losers:[...selectedLosers], date});
-  save(); closeModals(); renderTable();
-  const wNames = selectedWinners.map(id=>players.find(p=>p.id===id)?.name).join(' & ');
-  showToast(`${wNames} — W logged! 🏆`);
+
+  if (type === 'solo') {
+    if (logSelectedPlayers.length < 2) { showToast('Select at least 2 players'); return; }
+    games.push({ id:'g'+Date.now(), type:'solo', rankings:[...logSelectedPlayers], date });
+    const winner = players.find(p=>p.id===logSelectedPlayers[0])?.name || '?';
+    save(); closeModals(); renderTable();
+    showToast(`${winner} wins! 🏆`);
+  } else {
+    const numTeams = parseInt(document.getElementById('num-teams').value) || 2;
+    const teamSize = parseInt(document.getElementById('team-size').value) || 2;
+    for (let t = 0; t < numTeams; t++) {
+      if (teamAssignments[t].length !== teamSize) {
+        showToast(`Team ${String.fromCharCode(65+t)} needs ${teamSize} players`); return;
+      }
+    }
+    // rankings = array of teams in finishing order, each team is array of player ids
+    const rankings = teamRankOrder.map(ti => [...teamAssignments[ti]]);
+    games.push({ id:'g'+Date.now(), type:'team', rankings, date });
+    const winTeamIdx = teamRankOrder[0];
+    const winNames = teamAssignments[winTeamIdx].map(id=>players.find(p=>p.id===id)?.name||'?').join(' & ');
+    save(); closeModals(); renderTable();
+    showToast(`${winNames} win! 🏆`);
+  }
 }
 
+// ── DELETE / RESTORE GAME ─────────────────────────────────────────────────────
 function openDeleteGame(id) {
   deleteGameTarget = id;
   document.getElementById('deleter-name').value = '';
@@ -811,42 +1295,36 @@ function confirmDeleteGame() {
   if (!deleteGameTarget) return;
   const deleterName = document.getElementById('deleter-name').value.trim();
   if (!deleterName) { showToast('Enter your name first'); return; }
-
-  const gameIdx = games.findIndex(g => g.id === deleteGameTarget);
-  if (gameIdx === -1) return;
-
-  const game = games[gameIdx];
+  const idx = games.findIndex(g => g.id === deleteGameTarget);
+  if (idx === -1) return;
+  const game = games[idx];
   const deletedAt = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  const archivedGame = { ...game, deletedBy: deleterName, deletedAt };
-
-  games.splice(gameIdx, 1);
-  deletedGames.push(archivedGame);
+  deletedGames.push({ ...game, deletedBy: deleterName, deletedAt });
+  games.splice(idx, 1);
   deleteGameTarget = null;
-
   save(); closeModals(); renderTable();
   if (document.getElementById('tab-history').style.display !== 'none') renderHistory();
   showToast('Game moved to Deleted games');
 }
 
 function restoreGame(id) {
-  const gameIdx = deletedGames.findIndex(g => g.id === id);
-  if (gameIdx === -1) return;
-
-  const game = deletedGames[gameIdx];
-  // Strip the deletion metadata before restoring
-  const { deletedBy, deletedAt, ...restoredGame } = game;
-  deletedGames.splice(gameIdx, 1);
-  games.push(restoredGame);
-
+  const idx = deletedGames.findIndex(g => g.id === id);
+  if (idx === -1) return;
+  const { deletedBy, deletedAt, ...restored } = deletedGames[idx];
+  deletedGames.splice(idx, 1);
+  games.push(restored);
   save(); renderTable(); renderDeleted();
-  const wNames = restoredGame.winners.map(id=>players.find(p=>p.id===id)?.name||'?').join(' & ');
-  showToast(`${wNames}'s game restored ✓`);
+  showToast('Game restored ✓');
 }
 
+// ── CLOSE MODALS ──────────────────────────────────────────────────────────────
 function closeModals() {
-  ['modal-add','modal-log','modal-remove','modal-delete-game'].forEach(id=>document.getElementById(id).style.display='none');
+  ['modal-add','modal-log','modal-remove','modal-delete-game'].forEach(id => {
+    document.getElementById(id).style.display='none';
+  });
 }
 
+// ── TOAST ─────────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -854,6 +1332,7 @@ function showToast(msg) {
   setTimeout(()=>t.classList.remove('show'), 2400);
 }
 
+// ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
   if (window._firebaseReady && window._fbLoad) {
     window._fbLoad();
@@ -864,7 +1343,7 @@ function init() {
 
 (function() {
   const body = document.getElementById('leaderboard-body');
-  if (body) body.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>Connecting to database…</div></td></tr>`;
+  if (body) body.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>Connecting to database…</div></td></tr>`;
 })();
 
 init();
