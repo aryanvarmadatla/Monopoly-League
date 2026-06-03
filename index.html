@@ -450,7 +450,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
         <p id="subtitle">0 players · 0 games played</p>
       </div>
       <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;">
-        Version 5.0
+        Version 6.0
       </div>
       <div class="header-actions">
         <button onclick="openAddPlayer()"><i class="ti ti-plus"></i> Add player</button>
@@ -555,7 +555,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
               <thead><tr><th>Place</th><th>Points</th></tr></thead>
               <tbody>
                 <tr><td><div class="place-cell">👑 1st</div></td><td class="pts-highlight">4 pts</td></tr>
-                <tr><td><div class="place-cell">2nd</div></td><td class="pts-zero">0 pts</td></tr>
+                <tr><td><div class="place-cell">🥈 2nd</div></td><td>2 pts</td></tr>
                 <tr><td><div class="place-cell">3rd</div></td><td class="pts-zero">0 pts</td></tr>
               </tbody>
             </table>
@@ -574,7 +574,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
               <tbody>
                 <tr><td><div class="place-cell">👑 1st</div></td><td class="pts-highlight">5 pts</td></tr>
                 <tr><td><div class="place-cell">🥈 2nd</div></td><td>2 pts</td></tr>
-                <tr><td><div class="place-cell">3rd</div></td><td class="pts-zero">0 pts</td></tr>
+                <tr><td><div class="place-cell">🥉 3rd</div></td><td>1 pt</td></tr>
                 <tr><td><div class="place-cell">4th</div></td><td class="pts-zero">0 pts</td></tr>
               </tbody>
             </table>
@@ -645,7 +645,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
             <table class="pts-table">
               <thead><tr><th>Finish</th><th>Per player</th></tr></thead>
               <tbody>
-                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">5 pts</td></tr>
+                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">3 pts</td></tr>
                 <tr><td><div class="place-cell">2nd team</div></td><td class="pts-zero">0 pts</td></tr>
               </tbody>
             </table>
@@ -662,7 +662,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
             <table class="pts-table">
               <thead><tr><th>Finish</th><th>Per player</th></tr></thead>
               <tbody>
-                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">6 pts</td></tr>
+                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">4 pts</td></tr>
                 <tr><td><div class="place-cell">2nd team</div></td><td class="pts-zero">0 pts</td></tr>
               </tbody>
             </table>
@@ -679,7 +679,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
             <table class="pts-table">
               <thead><tr><th>Finish</th><th>Per player</th></tr></thead>
               <tbody>
-                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">6 pts</td></tr>
+                <tr><td><div class="place-cell">👑 1st team</div></td><td class="pts-highlight">4 pts</td></tr>
                 <tr><td><div class="place-cell">🥈 2nd team</div></td><td>2 pts</td></tr>
                 <tr><td><div class="place-cell">3rd team</div></td><td class="pts-zero">0 pts</td></tr>
               </tbody>
@@ -695,7 +695,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
               </div>
             </div>
             <ul class="rule-list">
-              <li>Solo 1st (4–8 pts) is always more than team 1st (5–6 pts) at larger field sizes, since you're winning alone.</li>
+              <li>Solo 1st (4–8 pts) is always more than or equal to team 1st (3–4 pts) at every field size, since you're winning alone.</li>
               <li>2-team games are win-or-nothing — 2nd place gets 0 because there's no meaningful "middle" finish with only two teams.</li>
               <li>3-team (2v2v2) rewards 2nd place because beating one of three teams is a real accomplishment worth acknowledging.</li>
               <li>3v3 rewards more per player than 2v2 since coordinating 3 people is harder.</li>
@@ -867,17 +867,17 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 // ── POINT TABLES ─────────────────────────────────────────
 // Solo: keyed by player count. Index = finish position (0-based). 0 = not scored.
 const SOLO_PTS_BY_COUNT = {
-  3: [4, 0, 0],
-  4: [5, 2, 0, 0],
+  3: [4, 2, 0],
+  4: [5, 2, 1, 0],
   5: [6, 3, 1, 0, 0],
   6: [8, 4, 2, 0, 0, 0]
 };
 
 // Team: keyed by format string
 const TEAM_PTS_BY_FORMAT = {
-  '2v2':   [5, 0],
-  '3v3':   [6, 0],
-  '2v2v2': [6, 2, 0]
+  '2v2':   [3, 0],
+  '3v3':   [4, 0],
+  '2v2v2': [4, 2, 0]
 };
 
 const PROVISIONAL_THRESHOLD = 5;
