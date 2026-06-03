@@ -249,6 +249,8 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 .pts        { font-weight:700; font-size:15px; }
 .pts.leader { color:#0d9260; }
 .stat       { font-size:13px; color:var(--text-secondary); }
+.win-stat   { color:#16a34a; font-weight:600; }
+.loss-stat  { color:var(--text-tertiary); }
 .median-score      { font-weight:700; font-size:14px; color:var(--purple-text); }
 .median-score.top  { color:#0d9260; }
 
@@ -447,6 +449,9 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
         <h1>🎩 Monopoly League</h1>
         <p id="subtitle">0 players · 0 games played</p>
       </div>
+      <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;">
+        Version 5.0
+      </div>
       <div class="header-actions">
         <button onclick="openAddPlayer()"><i class="ti ti-plus"></i> Add player</button>
         <button class="primary" onclick="openLogGame()"><i class="ti ti-trophy"></i> Log game</button>
@@ -470,6 +475,8 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
               <th style="width:22px"></th>
               <th>Player</th>
               <th class="num">GP</th>
+              <th class="num" title="Wins">W</th>
+              <th class="num" title="Losses">L</th>
               <th class="num">Total Pts</th>
               <th class="num">Avg PPG</th>
               <th class="num" title="Median points per game — primary sort">Med PPG ↑</th>
@@ -945,11 +952,12 @@ function getStats(pid) {
   }
 
   const gp      = perGamePts.length;
+  const losses  = gp - wins;
   const avgPPG  = gp > 0 ? totalPts / gp : 0;
   const medPPG  = median(perGamePts);
   const winPct  = gp > 0 ? Math.round((wins / gp) * 100) : null;
 
-  return { gp, totalPts, avgPPG, medPPG, winPct, wins };
+  return { gp, totalPts, avgPPG, medPPG, winPct, wins, losses };
 }
 
 function getRanked() {
@@ -985,7 +993,7 @@ function renderTable() {
   updateDeletedBadge();
 
   if (!players.length) {
-    body.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="ti ti-users"></i>No players yet.<br>Hit "Add player" to get started.</div></td></tr>`;
+    body.innerHTML = `<tr><td colspan="11"><div class="empty-state"><i class="ti ti-users"></i>No players yet.<br>Hit "Add player" to get started.</div></td></tr>`;
     document.getElementById('subtitle').textContent = '0 players · 0 games played';
     prevRanks = {};
     return;
@@ -1062,6 +1070,8 @@ function renderTable() {
         </span>
       </div></td>
       <td class="num"><div class="cell-inner${ci}"><span class="stat">${p.gp}</span></div></td>
+      <td class="num"><div class="cell-inner${ci}"><span class="stat win-stat">${p.gp > 0 ? p.wins : '—'}</span></div></td>
+      <td class="num"><div class="cell-inner${ci}"><span class="stat loss-stat">${p.gp > 0 ? p.losses : '—'}</span></div></td>
       <td class="num"><div class="cell-inner${ci}"><span class="pts${isLeader?' leader':''}">${p.totalPts}</span></div></td>
       <td class="num"><div class="cell-inner${ci}"><span class="stat">${avgDisplay}</span></div></td>
       <td class="num"><div class="cell-inner${ci}"><span class="${medClass}">${medDisplay}</span></div></td>
@@ -1447,7 +1457,7 @@ function init() {
 
 (function () {
   const body = document.getElementById('leaderboard-body');
-  if (body) body.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>Connecting to database…</div></td></tr>`;
+  if (body) body.innerHTML = `<tr><td colspan="11"><div class="empty-state"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>Connecting to database…</div></td></tr>`;
 })();
 
 init();
