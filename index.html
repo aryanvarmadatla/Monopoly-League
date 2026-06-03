@@ -22,9 +22,36 @@
   const db = getFirestore(app);
   const DATA_DOC = doc(db, "monopoly-league", "data");
 
+  // Firestore doesn't support nested arrays, so we serialize team rankings
+  // (arrays of arrays) as JSON strings before saving, and parse them on load.
+  function serializeGames(gamesList) {
+    return (gamesList || []).map(g => {
+      if (g.type !== 'team' || !g.rankings) return g;
+      return { ...g, rankings: g.rankings.map(slot =>
+        Array.isArray(slot) ? JSON.stringify(slot) : slot
+      )};
+    });
+  }
+
+  function deserializeGames(gamesList) {
+    return (gamesList || []).map(g => {
+      if (g.type !== 'team' || !g.rankings) return g;
+      return { ...g, rankings: g.rankings.map(slot => {
+        if (typeof slot === 'string') {
+          try { return JSON.parse(slot); } catch(e) { return slot; }
+        }
+        return slot;
+      })};
+    });
+  }
+
   window._fbSave = async function(players, games, deletedGames) {
     try {
-      await setDoc(DATA_DOC, { players, games, deletedGames });
+      await setDoc(DATA_DOC, {
+        players,
+        games: serializeGames(games),
+        deletedGames: serializeGames(deletedGames)
+      });
     } catch (e) {
       console.error("Firebase save error:", e);
       showToast("⚠️ Save failed — check your Firebase config");
@@ -38,8 +65,8 @@
     if (incoming === window._lastSaved) return;
     window._lastSaved = incoming;
     players = data.players || [];
-    games   = data.games   || [];
-    deletedGames = data.deletedGames || [];
+    games   = deserializeGames(data.games   || []);
+    deletedGames = deserializeGames(data.deletedGames || []);
     prevRanks = {};
     renderTable();
     const activeTab = document.querySelector('.tab.active')?.dataset.tab;
@@ -56,8 +83,8 @@
       if (snap.exists()) {
         const data = snap.data();
         players = data.players || [];
-        games   = data.games   || [];
-        deletedGames = data.deletedGames || [];
+        games   = deserializeGames(data.games   || []);
+        deletedGames = deserializeGames(data.deletedGames || []);
         window._lastSaved = JSON.stringify(data);
 
         // Run migration — converts any old-format games to new rankings structure
@@ -72,7 +99,11 @@
           // Save migrated data back to Firebase so it only runs once
           const payload = { players, games, deletedGames };
           window._lastSaved = JSON.stringify(payload);
-          await setDoc(DATA_DOC, payload);
+          await setDoc(DATA_DOC, {
+            players,
+            games: serializeGames(games),
+            deletedGames: serializeGames(deletedGames)
+          });
           console.log('Migration saved to Firebase');
         }
       }
@@ -466,7 +497,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
         <p id="subtitle">0 players · 0 games played</p>
       </div>
       <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;">
-        Version 6.7
+          Version 6.7
       </div>
       <div class="header-actions">
         <button onclick="openAddPlayer()"><i class="ti ti-plus"></i> Add player</button>
