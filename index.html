@@ -45,12 +45,13 @@
     });
   }
 
-  window._fbSave = async function(players, games, deletedGames) {
+  window._fbSave = async function(players, games, deletedGames, auditLog) {
     try {
       await setDoc(DATA_DOC, {
         players,
         games: serializeGames(games),
-        deletedGames: serializeGames(deletedGames)
+        deletedGames: serializeGames(deletedGames),
+        auditLog: auditLog || []
       });
     } catch (e) {
       console.error("Firebase save error:", e);
@@ -64,9 +65,10 @@
     const incoming = JSON.stringify(data);
     if (incoming === window._lastSaved) return;
     window._lastSaved = incoming;
-    players = data.players || [];
-    games   = deserializeGames(data.games   || []);
+    players      = data.players || [];
+    games        = deserializeGames(data.games        || []);
     deletedGames = deserializeGames(data.deletedGames || []);
+    auditLog     = data.auditLog  || [];
     prevRanks = {};
     renderTable();
     const activeTab = document.querySelector('.tab.active')?.dataset.tab;
@@ -82,9 +84,10 @@
       const snap = await getDoc(DATA_DOC);
       if (snap.exists()) {
         const data = snap.data();
-        players = data.players || [];
-        games   = deserializeGames(data.games   || []);
+        players      = data.players || [];
+        games        = deserializeGames(data.games        || []);
         deletedGames = deserializeGames(data.deletedGames || []);
+        auditLog     = data.auditLog  || [];
         window._lastSaved = JSON.stringify(data);
 
         // Run migration — converts any old-format games to new rankings structure
@@ -97,12 +100,14 @@
           games = migratedGames;
           deletedGames = migratedDeleted;
           // Save migrated data back to Firebase so it only runs once
-          const payload = { players, games, deletedGames };
+          if (typeof audit === 'function') audit('migration', { count: migrated });
+          const payload = { players, games, deletedGames, auditLog };
           window._lastSaved = JSON.stringify(payload);
           await setDoc(DATA_DOC, {
             players,
             games: serializeGames(games),
-            deletedGames: serializeGames(deletedGames)
+            deletedGames: serializeGames(deletedGames),
+            auditLog
           });
           console.log('Migration saved to Firebase');
         }
@@ -572,13 +577,15 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
             </div>
             <div class="ranking-box">
               <div><span class="rk-label">1st:</span> <span class="rk-primary">Median PPG</span> — the middle value of all your per-game scores. Immune to one huge blowout game inflating your average.</div>
-              <div><span class="rk-label">2nd:</span> <span class="rk-secondary">Total points</span> — tiebreaker only. If two players have the same median, more total points wins.</div>
-              <div><span class="rk-label">3rd:</span> <span class="rk-secondary">Name (alphabetical)</span> — last resort tiebreaker.</div>
+              <div><span class="rk-label">2nd:</span> <span class="rk-secondary">Avg PPG</span> — mean points per game. Tiebreaker when medians are equal.</div>
+              <div><span class="rk-label">3rd:</span> <span class="rk-secondary">Win %</span> — percentage of games where you finished 1st. Tiebreaker when both PPG values are equal.</div>
+              <div><span class="rk-label">4th:</span> <span class="rk-secondary">Total points</span> — raw accumulated points. Rewards players who play more at equal efficiency.</div>
+              <div><span class="rk-label">5th:</span> <span class="rk-secondary">Name (alphabetical)</span> — last resort tiebreaker.</div>
             </div>
             <ul class="rule-list" style="margin-top:10px">
               <li><strong>Why median, not average?</strong> A single massive game (e.g. winning a 6-player solo) can inflate a mean average and make a player look better than they really are. Median shows your consistent, typical performance.</li>
               <li><strong>Why not total points?</strong> Someone who plays 30 games will almost always have more total points than someone with 10 games — even if the 10-game player is clearly better. PPG removes that bias. MLS used PPG for exactly this reason during their 2020 season when teams played different numbers of games.</li>
-              <li><strong>Provisional players</strong> (fewer than 5 games) are ranked below all established players regardless of their Med PPG, since a median of 2–4 games isn't meaningful yet.</li>
+              <li><strong>Provisional players</strong> (fewer than 10 games) are ranked below all established players regardless of their Med PPG. A sample of under 10 games isn't stable enough to rank fairly.</li>
             </ul>
           </div>
 
@@ -756,13 +763,13 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
               <div class="rules-card-icon" style="background:var(--amber-bg)">⚠️</div>
               <div>
                 <div class="rules-card-title">Provisional Players</div>
-                <div class="rules-card-subtitle">Fewer than 5 games played</div>
+                <div class="rules-card-subtitle">Fewer than 10 games played</div>
               </div>
             </div>
             <ul class="rule-list">
               <li>Marked <span class="provisional-badge">Provisional</span> in the table.</li>
-              <li>Ranked below all established players regardless of stats — a median of 1–4 games is not a reliable sample.</li>
-              <li>Badge disappears automatically once 5 games are logged.</li>
+              <li>Ranked below all established players regardless of stats — fewer than 10 games is not a reliable sample.</li>
+              <li>Badge disappears automatically once 10 games are logged.</li>
             </ul>
           </div>
 
@@ -927,7 +934,7 @@ const TEAM_PTS_BY_FORMAT = {
   '2v2v2': [4, 2, 0]
 };
 
-const PROVISIONAL_THRESHOLD = 5;
+const PROVISIONAL_THRESHOLD = 10;
 
 const AVATAR_COLORS = [
   ['#DBEAFE','#1e40af'],['#D1FAE5','#065f46'],['#FEF3C7','#92400e'],
@@ -939,6 +946,7 @@ const AVATAR_COLORS = [
 let players      = [];
 let games        = [];
 let deletedGames = [];
+let auditLog     = [];
 let removeTarget      = null;
 let deleteGameTarget  = null;
 let prevRanks         = {};
@@ -950,9 +958,28 @@ let teamRankOrder      = [];
 
 // ── SAVE ─────────────────────────────────────────────────
 function save() {
-  const payload = { players, games, deletedGames };
+  const payload = { players, games, deletedGames, auditLog };
   window._lastSaved = JSON.stringify(payload);
-  if (window._fbSave) window._fbSave(players, games, deletedGames);
+  if (window._fbSave) window._fbSave(players, games, deletedGames, auditLog);
+}
+
+// ── AUDIT LOG ─────────────────────────────────────────────
+function nowISO() {
+  return new Date().toISOString(); // e.g. "2026-06-06T14:32:00.000Z"
+}
+function nowDisplay() {
+  return new Date().toLocaleString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+function audit(action, detail) {
+  auditLog.push({
+    ts:      nowISO(),
+    tsLabel: nowDisplay(),
+    action,
+    ...detail
+  });
 }
 
 // ── HELPERS ──────────────────────────────────────────────
@@ -1014,7 +1041,11 @@ function getRanked() {
   const unplayed     = all.filter(p => p.gp === 0);
 
   const sortFn = (a, b) =>
-    b.medPPG - a.medPPG || b.totalPts - a.totalPts || a.name.localeCompare(b.name);
+    b.medPPG    - a.medPPG    ||
+    b.avgPPG    - a.avgPPG    ||
+    (b.winPct ?? 0) - (a.winPct ?? 0) ||
+    b.totalPts  - a.totalPts  ||
+    a.name.localeCompare(b.name);
 
   established.sort(sortFn);
   provisional.sort(sortFn);
@@ -1226,7 +1257,9 @@ function confirmAddPlayer() {
   const name = document.getElementById('new-player-name').value.trim();
   if (!name) return;
   if (players.find(p => p.name.toLowerCase() === name.toLowerCase())) { showToast('That name already exists'); return; }
-  players.push({ id: 'p' + Date.now(), name, colorIdx: players.length });
+  const newPlayer = { id: 'p' + Date.now(), name, colorIdx: players.length };
+  players.push(newPlayer);
+  audit('player_added', { playerId: newPlayer.id, playerName: name });
   save(); closeModals(); renderTable();
   showToast(`${name} added to the league!`);
 }
@@ -1263,6 +1296,7 @@ function confirmRemovePlayer() {
   deletedGames = freezeNameInGames(deletedGames);
 
   delete prevRanks[removeTarget];
+  if (p) audit('player_removed', { playerId: p.id, playerName: p.name });
   removeTarget = null;
   save(); closeModals(); renderTable();
   if (p) showToast(`${p.name} removed — game logs preserved`);
@@ -1442,8 +1476,10 @@ function confirmLogGame() {
     const count = logSelectedPlayers.length;
     if (count < 3 || count > 6) { showToast('Solo games need 3–6 players'); return; }
     if (!SOLO_PTS_BY_COUNT[count]) { showToast(`No point table for ${count} players`); return; }
-    games.push({ id: 'g' + Date.now(), type: 'solo', rankings: [...logSelectedPlayers], date });
+    const newSoloGame = { id: 'g' + Date.now(), type: 'solo', rankings: [...logSelectedPlayers], date };
+    games.push(newSoloGame);
     const winner = players.find(p => p.id === logSelectedPlayers[0])?.name || '?';
+    audit('game_logged', { gameId: newSoloGame.id, type: 'solo', playerCount: count, winner, date });
     save(); closeModals(); renderTable();
     showToast(`${winner} wins! 🏆`);
   } else {
@@ -1456,9 +1492,11 @@ function confirmLogGame() {
       }
     }
     const rankings = teamRankOrder.map(ti => [...teamAssignments[ti]]);
-    games.push({ id: 'g' + Date.now(), type: 'team', format: fmt, rankings, date });
+    const newTeamGame = { id: 'g' + Date.now(), type: 'team', format: fmt, rankings, date };
+    games.push(newTeamGame);
     const winTeam  = teamAssignments[teamRankOrder[0]];
     const winNames = winTeam.map(id => players.find(p => p.id === id)?.name || '?').join(' & ');
+    audit('game_logged', { gameId: newTeamGame.id, type: 'team', format: fmt, winners: winNames, date });
     save(); closeModals(); renderTable();
     showToast(`${winNames} win! 🏆`);
   }
@@ -1478,7 +1516,9 @@ function confirmDeleteGame() {
   const idx = games.findIndex(g => g.id === deleteGameTarget);
   if (idx === -1) return;
   const deletedAt = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  deletedGames.push({ ...games[idx], deletedBy: name, deletedAt });
+  const deletedGame = { ...games[idx], deletedBy: name, deletedAt };
+  deletedGames.push(deletedGame);
+  audit('game_deleted', { gameId: deletedGame.id, deletedBy: name, gameDate: deletedGame.date, type: deletedGame.type });
   games.splice(idx, 1);
   deleteGameTarget = null;
   save(); closeModals(); renderTable();
@@ -1491,6 +1531,7 @@ function restoreGame(id) {
   const { deletedBy, deletedAt, ...restored } = deletedGames[idx];
   deletedGames.splice(idx, 1);
   games.push(restored);
+  audit('game_restored', { gameId: restored.id, gameDate: restored.date, type: restored.type });
   save(); renderTable(); renderDeleted();
   showToast('Game restored ✓');
 }
