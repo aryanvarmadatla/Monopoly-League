@@ -224,6 +224,47 @@ button.danger:hover  { background: var(--red-bg); }
 button.restore       { color: var(--green-text); border-color: var(--border); padding: 5px 9px; font-size: 12px; }
 button.restore:hover { background: var(--green-bg); }
 
+/* ── ADMIN MODE ─────────────────────────────────────────── */
+.admin-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px; border-radius: 20px;
+  background: var(--amber-bg); color: var(--amber-text);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  border: 0.5px solid rgba(0,0,0,0.08);
+  transition: background 0.15s, opacity 0.15s;
+  user-select: none;
+}
+.admin-bar:hover { opacity: 0.85; background: var(--amber-bg); }
+.admin-bar .admin-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--amber-text); flex-shrink: 0;
+}
+.admin-bar.inactive { background: var(--bg-secondary); color: var(--text-tertiary); }
+.admin-bar.inactive .admin-dot { background: var(--text-tertiary); }
+
+/* Admin PIN modal */
+.pin-dots { display: flex; gap: 10px; justify-content: center; margin: 1rem 0 0.5rem; }
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--bg-tertiary); border: 1.5px solid var(--border-md);
+  transition: background 0.15s;
+}
+.pin-dot.filled { background: var(--text); border-color: var(--text); }
+.pin-pad {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin-top: 1rem;
+}
+.pin-key {
+  padding: 14px; font-size: 18px; font-weight: 600;
+  border-radius: var(--radius-md); border: 0.5px solid var(--border-md);
+  background: var(--bg-secondary); color: var(--text);
+  cursor: pointer; font-family: inherit; text-align: center;
+  transition: background 0.1s, transform 0.1s;
+}
+.pin-key:hover  { background: var(--bg-tertiary); }
+.pin-key:active { transform: scale(0.93); }
+.pin-error { text-align: center; font-size: 12px; color: var(--red-text); margin-top: 6px; min-height: 18px; }
+
 .tabs {
   display: flex; border-bottom: 0.5px solid var(--border);
   padding: 0 1.5rem; margin-top: 1rem; overflow-x: auto;
@@ -502,8 +543,12 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
         <p id="subtitle">0 players · 0 games played</p>
       </div>
       <div class="header-actions">
-        <button onclick="openAddPlayer()"><i class="ti ti-plus"></i> Add player</button>
-        <button class="primary" onclick="openLogGame()"><i class="ti ti-trophy"></i> Log game</button>
+        <div class="admin-bar inactive" id="admin-bar" onclick="adminBarClick()" title="Admin login">
+          <span class="admin-dot"></span>
+          <span id="admin-bar-label">Admin</span>
+        </div>
+        <button id="btn-add-player" style="display:none" onclick="openAddPlayer()"><i class="ti ti-plus"></i> Add player</button>
+        <button id="btn-log-game"   style="display:none" class="primary" onclick="openLogGame()"><i class="ti ti-trophy"></i> Log game</button>
       </div>
     </div>
 
@@ -915,6 +960,37 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
   </div>
 </div>
 
+<!-- Admin PIN Modal -->
+<div id="modal-admin-pin" style="display:none">
+  <div class="modal-bg" onclick="closeModals()">
+    <div class="modal" style="width:320px;text-align:center" onclick="event.stopPropagation()">
+      <h2>🔐 Admin login</h2>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px">Enter the 4-digit PIN</p>
+      <div class="pin-dots">
+        <div class="pin-dot" id="pd0"></div>
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+      <div class="pin-pad">
+        <button class="pin-key" onclick="pinKey('1')">1</button>
+        <button class="pin-key" onclick="pinKey('2')">2</button>
+        <button class="pin-key" onclick="pinKey('3')">3</button>
+        <button class="pin-key" onclick="pinKey('4')">4</button>
+        <button class="pin-key" onclick="pinKey('5')">5</button>
+        <button class="pin-key" onclick="pinKey('6')">6</button>
+        <button class="pin-key" onclick="pinKey('7')">7</button>
+        <button class="pin-key" onclick="pinKey('8')">8</button>
+        <button class="pin-key" onclick="pinKey('9')">9</button>
+        <button class="pin-key" onclick="pinKey('back')" style="font-size:14px">⌫</button>
+        <button class="pin-key" onclick="pinKey('0')">0</button>
+        <button class="pin-key" onclick="closeModals()" style="font-size:12px;color:var(--text-secondary)">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -955,6 +1031,90 @@ let prevRanks         = {};
 let logSelectedPlayers = [];
 let teamAssignments    = [];
 let teamRankOrder      = [];
+
+// ── ADMIN MODE ────────────────────────────────────────────
+// PIN is stored as a simple hash so it's not plaintext in source.
+// Change ADMIN_PIN_HASH to match your desired 4-digit PIN.
+// To generate a new hash: btoa('your4digits') in the browser console.
+// Default PIN: 6969  →  btoa('6969') = 'Njk2OQ=='
+const ADMIN_PIN_HASH = 'Njk2OQ==';
+
+let isAdmin     = false;
+let pinBuffer   = '';
+
+function adminBarClick() {
+  if (isAdmin) {
+    isAdmin = false;
+    updateAdminUI();
+    showToast('Admin mode off');
+  } else {
+    pinBuffer = '';
+    updatePinDots();
+    document.getElementById('pin-error').textContent = '';
+    document.getElementById('modal-admin-pin').style.display = '';
+  }
+}
+
+function pinKey(k) {
+  if (k === 'back') {
+    pinBuffer = pinBuffer.slice(0, -1);
+    updatePinDots();
+    return;
+  }
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += k;
+  updatePinDots();
+  if (pinBuffer.length === 4) {
+    setTimeout(checkPin, 120); // tiny delay so last dot fills visually
+  }
+}
+
+function checkPin() {
+  if (btoa(pinBuffer) === ADMIN_PIN_HASH) {
+    isAdmin = true;
+    closeModals();
+    updateAdminUI();
+    showToast('Admin mode on 🔑');
+  } else {
+    document.getElementById('pin-error').textContent = 'Wrong PIN — try again';
+    pinBuffer = '';
+    updatePinDots();
+  }
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('pd' + i).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+
+function updateAdminUI() {
+  const bar   = document.getElementById('admin-bar');
+  const label = document.getElementById('admin-bar-label');
+  const btnAdd  = document.getElementById('btn-add-player');
+  const btnLog  = document.getElementById('btn-log-game');
+  if (isAdmin) {
+    bar.classList.remove('inactive');
+    label.textContent = 'Admin — tap to exit';
+    btnAdd.style.display  = '';
+    btnLog.style.display  = '';
+  } else {
+    bar.classList.add('inactive');
+    label.textContent = 'Admin';
+    btnAdd.style.display  = 'none';
+    btnLog.style.display  = 'none';
+  }
+  // Re-render so delete buttons appear/disappear
+  renderTable();
+  const activeTab = document.querySelector('.tab.active')?.dataset.tab;
+  if (activeTab === 'history') renderHistory();
+  if (activeTab === 'deleted') renderDeleted();
+}
+
+function requireAdmin(action) {
+  if (!isAdmin) { showToast('Admin mode required 🔐'); return false; }
+  return true;
+}
 
 // ── SAVE ─────────────────────────────────────────────────
 function save() {
@@ -1155,7 +1315,7 @@ function renderTable() {
       <td class="num"><div class="cell-inner${ci}"><span class="${medClass}">${medDisplay}</span></div></td>
       <td class="num"><div class="cell-inner${ci}"><span class="stat">${winDisplay}</span></div></td>
       <td class="num"><div class="cell-inner${ci}">
-        <button class="danger" onclick="openRemove('${p.id}','${p.name.replace(/'/g,"\\'")}')"><i class="ti ti-trash"></i></button>
+        ${isAdmin ? `<button class="danger" onclick="openRemove('${p.id}','${p.name.replace(/'/g,"\\'")}')"><i class="ti ti-trash"></i></button>` : ''}
       </div></td>
     </tr>`;
   });
@@ -1204,9 +1364,11 @@ function renderGameItem(g, showDelete) {
     rankingsHtml += '</div>';
   }
 
-  const actionBtn = showDelete
-    ? `<button class="danger" onclick="openDeleteGame('${g.id}')" title="Delete"><i class="ti ti-trash"></i></button>`
-    : `<button class="restore" onclick="restoreGame('${g.id}')"><i class="ti ti-arrow-back-up"></i> Restore</button>`;
+  const actionBtn = isAdmin
+    ? (showDelete
+        ? `<button class="danger" onclick="openDeleteGame('${g.id}')" title="Delete"><i class="ti ti-trash"></i></button>`
+        : `<button class="restore" onclick="restoreGame('${g.id}')"><i class="ti ti-arrow-back-up"></i> Restore</button>`)
+    : '';
 
   const deletedByHtml = g.deletedBy
     ? `<div class="deleted-by"><i class="ti ti-trash" style="font-size:10px"></i> Deleted by ${g.deletedBy}${g.deletedAt ? ' · ' + g.deletedAt : ''}</div>`
@@ -1249,6 +1411,7 @@ function switchTab(tab) {
 
 // ── ADD PLAYER ────────────────────────────────────────────
 function openAddPlayer() {
+  if (!requireAdmin()) return;
   document.getElementById('new-player-name').value = '';
   document.getElementById('modal-add').style.display = '';
   setTimeout(() => document.getElementById('new-player-name').focus(), 50);
@@ -1266,6 +1429,7 @@ function confirmAddPlayer() {
 
 // ── REMOVE PLAYER ─────────────────────────────────────────
 function openRemove(id, name) {
+  if (!requireAdmin()) return;
   removeTarget = id;
   document.getElementById('remove-name').textContent = name;
   document.getElementById('modal-remove').style.display = '';
@@ -1304,6 +1468,7 @@ function confirmRemovePlayer() {
 
 // ── LOG GAME UI ───────────────────────────────────────────
 function openLogGame() {
+  if (!requireAdmin()) return;
   if (!players.length) { showToast('Add a player first'); return; }
   logSelectedPlayers = [];
   teamAssignments    = [];
@@ -1504,6 +1669,7 @@ function confirmLogGame() {
 
 // ── DELETE / RESTORE GAME ─────────────────────────────────
 function openDeleteGame(id) {
+  if (!requireAdmin()) return;
   deleteGameTarget = id;
   document.getElementById('deleter-name').value = '';
   document.getElementById('modal-delete-game').style.display = '';
@@ -1526,6 +1692,7 @@ function confirmDeleteGame() {
   showToast('Game moved to Deleted games');
 }
 function restoreGame(id) {
+  if (!requireAdmin()) return;
   const idx = deletedGames.findIndex(g => g.id === id);
   if (idx === -1) return;
   const { deletedBy, deletedAt, ...restored } = deletedGames[idx];
@@ -1538,7 +1705,7 @@ function restoreGame(id) {
 
 // ── CLOSE MODALS ──────────────────────────────────────────
 function closeModals() {
-  ['modal-add','modal-log','modal-remove','modal-delete-game'].forEach(id => {
+  ['modal-add','modal-log','modal-remove','modal-delete-game','modal-admin-pin'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
 }
