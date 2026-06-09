@@ -20,7 +20,17 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const DATA_DOC = doc(db, "monopoly-league", "data");
+  const DATA_DOC   = doc(db, "monopoly-league", "data");
+  const CONFIG_DOC = doc(db, "monopoly-league", "config");
+
+  // Load adminPin from the private config document (Firestore rules: read if false)
+  // The .catch() is intentional — rules will block public reads, which is correct.
+  // Only the Firebase SDK running in context can attempt this read.
+  getDoc(CONFIG_DOC).then(snap => {
+    if (snap.exists() && snap.data().adminPin) {
+      if (typeof loadAdminHash === 'function') loadAdminHash({ adminPin: snap.data().adminPin });
+    }
+  }).catch(() => {});
 
   // Firestore doesn't support nested arrays, so we serialize team rankings
   // (arrays of arrays) as JSON strings before saving, and parse them on load.
@@ -1209,14 +1219,22 @@ let teamAssignments    = [];
 let teamRankOrder      = [];
 
 // ── ADMIN MODE ────────────────────────────────────────────
-// PIN is stored as a simple hash so it's not plaintext in source.
-// Change ADMIN_PIN_HASH to match your desired 4-digit PIN.
-// To generate a new hash: btoa('your4digits') in the browser console.
-// Default PIN: 6969  →  btoa('6969') = 'Njk2OQ=='
-const ADMIN_PIN_HASH = btoa('6767');
+// PIN hash is stored in Firebase (adminPin field) — nothing sensitive in source.
 
-let isAdmin     = false;
-let pinBuffer   = '';
+let isAdmin    = false;
+let pinBuffer  = '';
+let _adminHash = null;  // loaded from Firebase on init
+
+// Called from _fbLoad after data is fetched — grabs adminPin from Firestore doc
+function loadAdminHash(data) {
+  if (data && data.adminPin) _adminHash = data.adminPin;
+}
+
+// SHA-256 hash using the browser's built-in crypto API (no libraries needed)
+async function sha256(str) {
+  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 function adminBarClick() {
   if (isAdmin) {
@@ -1245,8 +1263,13 @@ function pinKey(k) {
   }
 }
 
-function checkPin() {
-  if (btoa(pinBuffer) === ADMIN_PIN_HASH) {
+async function checkPin() {
+  if (!_adminHash) {
+    document.getElementById('pin-error').textContent = 'PIN not set — add adminPin to Firebase';
+    pinBuffer = ''; updatePinDots(); return;
+  }
+  const hashed = await sha256(pinBuffer);
+  if (hashed === _adminHash) {
     isAdmin = true;
     closeModals();
     updateAdminUI();
