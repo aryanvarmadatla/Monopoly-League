@@ -26,11 +26,12 @@
   // Load adminPin from the private config document (Firestore rules: read if false)
   // The .catch() is intentional — rules will block public reads, which is correct.
   // Only the Firebase SDK running in context can attempt this read.
-  getDoc(CONFIG_DOC).then(snap => {
+  window._loadAdminPin = () => getDoc(CONFIG_DOC).then(snap => {
     if (snap.exists() && snap.data().adminPin) {
       if (typeof loadAdminHash === 'function') loadAdminHash({ adminPin: snap.data().adminPin });
     }
   }).catch(() => {});
+  window._loadAdminPin();
 
   // Firestore doesn't support nested arrays, so we serialize team rankings
   // (arrays of arrays) as JSON strings before saving, and parse them on load.
@@ -1250,7 +1251,9 @@ function adminBarClick() {
     isAdmin = false;
     updateAdminUI();
     showToast('Admin mode off');
-  } else {
+} else {
+    // Re-fetch PIN hash in case it wasn't ready on page load
+    if (!_adminHash && window._loadAdminPin) window._loadAdminPin();
     pinBuffer = '';
     updatePinDots();
     document.getElementById('pin-error').textContent = '';
