@@ -2089,8 +2089,9 @@ function renderSeasonView() {
     return;
   }
 
-  const ranked = getRankedFromSnapshot(snapPlayers, snapGames, snap.seasonNum);
-  const maxedSet = new Set(snap.maxedIds || []);
+  const ranked = snap.preRanked
+    ? [...snapPlayers].sort((a,b) => ((a.legacyStat?.rank)||99) - ((b.legacyStat?.rank)||99))
+    : getRankedFromSnapshot(snapPlayers, snapGames, snap.seasonNum);  const maxedSet = new Set(snap.maxedIds || []);
   const useQual  = snap.seasonNum >= 3;
   const medals   = ['👑','🥈','🥉'];
 
@@ -2351,21 +2352,21 @@ function seedLegacySeasons() {
     {id:'s1_p9',name:'Saad',   colorIdx:8},
   ];
   // Attach pre-computed stats directly on each player (used by getRankedFromSnapshot)
-  const s1stats = {
-    's1_p1':{gp:5, wins:4, losses:1,  totalPts:15,avgPPG:3.0,medPPG:3.0,winPct:80},
-    's1_p2':{gp:28,wins:11,losses:17, totalPts:59,avgPPG:2.1,medPPG:2.0,winPct:39},
-    's1_p3':{gp:18,wins:7, losses:11, totalPts:30,avgPPG:1.7,medPPG:2.0,winPct:39},
-    's1_p4':{gp:12,wins:5, losses:7,  totalPts:29,avgPPG:2.4,medPPG:2.0,winPct:42},
-    's1_p5':{gp:7, wins:2, losses:5,  totalPts:16,avgPPG:2.3,medPPG:2.0,winPct:29},
-    's1_p6':{gp:31,wins:7, losses:24, totalPts:47,avgPPG:1.5,medPPG:1.0,winPct:23},
-    's1_p7':{gp:14,wins:4, losses:10, totalPts:20,avgPPG:1.4,medPPG:1.0,winPct:29},
-    's1_p8':{gp:1, wins:0, losses:1,  totalPts:0, avgPPG:0.0,medPPG:0.0,winPct:0},
-    's1_p9':{gp:0, wins:0, losses:0,  totalPts:0, avgPPG:0,  medPPG:0,  winPct:null},
+const s1stats = {
+    's1_p1':{rank:1,gp:5, wins:4, losses:1,  totalPts:15,avgPPG:3.0,medPPG:3.0,winPct:80},
+    's1_p2':{rank:2,gp:28,wins:11,losses:17, totalPts:59,avgPPG:2.1,medPPG:2.0,winPct:39},
+    's1_p3':{rank:3,gp:18,wins:7, losses:11, totalPts:30,avgPPG:1.7,medPPG:2.0,winPct:39},
+    's1_p4':{rank:4,gp:12,wins:5, losses:7,  totalPts:29,avgPPG:2.4,medPPG:2.0,winPct:42},
+    's1_p5':{rank:5,gp:7, wins:2, losses:5,  totalPts:16,avgPPG:2.3,medPPG:2.0,winPct:29},
+    's1_p6':{rank:6,gp:31,wins:7, losses:24, totalPts:47,avgPPG:1.5,medPPG:1.0,winPct:23},
+    's1_p7':{rank:7,gp:14,wins:4, losses:10, totalPts:20,avgPPG:1.4,medPPG:1.0,winPct:29},
+    's1_p8':{rank:8,gp:1, wins:0, losses:1,  totalPts:0, avgPPG:0.0,medPPG:0.0,winPct:0},
+    's1_p9':{rank:9,gp:0, wins:0, losses:0,  totalPts:0, avgPPG:0,  medPPG:0,  winPct:null},
   };
   const s1pWithStats = s1p.map(p => ({ ...p, legacyStat: s1stats[p.id] }));
   seasons.push({
     seasonNum:1, winner:'Khaled', endDate:'June 2026',
-    players: s1pWithStats, games:[], maxedIds:[],
+    players: s1pWithStats, games:[], maxedIds:[], preRanked:true,
   });
 
   // ── Season 2 (Aryan wins, June 2026 — snapshot from live data) ───────────
