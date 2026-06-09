@@ -45,13 +45,14 @@
     });
   }
 
-  window._fbSave = async function(players, games, deletedGames, auditLog) {
+  window._fbSave = async function(players, games, deletedGames, auditLog, seasons) {
     try {
       await setDoc(DATA_DOC, {
         players,
         games: serializeGames(games),
         deletedGames: serializeGames(deletedGames),
-        auditLog: auditLog || []
+        auditLog: auditLog || [],
+        seasons: seasons || []
       });
     } catch (e) {
       console.error("Firebase save error:", e);
@@ -69,11 +70,13 @@
     games        = deserializeGames(data.games        || []);
     deletedGames = deserializeGames(data.deletedGames || []);
     auditLog     = data.auditLog  || [];
+    seasons      = data.seasons   || [];
     prevRanks = {};
     renderTable();
     const activeTab = document.querySelector('.tab.active')?.dataset.tab;
     if (activeTab === 'history') renderHistory();
     if (activeTab === 'deleted') renderDeleted();
+    if (activeTab === 'seasons') renderSeasonsTab();
   }, (err) => {
     console.error("Firestore listener error:", err);
     showToast("⚠️ Could not connect to database");
@@ -88,6 +91,7 @@
         games        = deserializeGames(data.games        || []);
         deletedGames = deserializeGames(data.deletedGames || []);
         auditLog     = data.auditLog  || [];
+        seasons      = data.seasons   || [];
         window._lastSaved = JSON.stringify(data);
 
         // Run migration — converts any old-format games to new rankings structure
@@ -531,6 +535,111 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
   border-radius:var(--radius-md); font-size:12px; color:var(--amber-text);
   display:flex; align-items:flex-start; gap:8px; line-height:1.5;
 }
+
+/* ── SEASON / MAXED ROW ──────────────────────────────── */
+tr.maxed-row       { background: rgba(22,163,74,0.08) !important; }
+tr.maxed-row:hover { background: rgba(22,163,74,0.14) !important; }
+.maxed-badge {
+  font-size:10px; padding:2px 7px; border-radius:8px;
+  background:#dcfce7; color:#14532d; font-weight:700;
+  border:1px solid rgba(22,163,74,0.25);
+}
+@media (prefers-color-scheme:dark) {
+  .maxed-badge { background:#052e16; color:#86efac; border-color:rgba(22,163,74,0.3); }
+  tr.maxed-row       { background: rgba(22,163,74,0.10) !important; }
+  tr.maxed-row:hover { background: rgba(22,163,74,0.18) !important; }
+}
+.notqualified-badge {
+  font-size:10px; padding:2px 7px; border-radius:8px;
+  background:var(--red-bg); color:var(--red-text); font-weight:700;
+}
+
+/* ── SEASON TAB ──────────────────────────────────────── */
+.season-section { padding:1rem 1.5rem 1.5rem; }
+.season-select-row {
+  display:flex; align-items:center; gap:10px; margin-bottom:1rem; flex-wrap:wrap;
+}
+.season-select-row label { font-size:12px; font-weight:600; color:var(--text-secondary); }
+.season-picker {
+  padding:7px 11px; border:0.5px solid var(--border-md);
+  border-radius:var(--radius-md); background:var(--bg-secondary);
+  color:var(--text); font-size:13px; font-family:inherit; outline:none;
+  transition:border-color 0.15s; min-width:160px;
+}
+.season-picker:focus { border-color:var(--text); }
+.season-winner-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 12px; border-radius:20px;
+  background:var(--amber-bg); color:var(--amber-text);
+  font-size:12px; font-weight:600;
+}
+.season-table-wrap { overflow-x:auto; }
+.season-table { width:100%; border-collapse:collapse; font-size:13px; }
+.season-table thead tr { border-bottom:1.5px solid var(--border-md); }
+.season-table th {
+  text-align:left; padding:7px 9px;
+  font-size:10px; font-weight:500; color:var(--text-secondary);
+  letter-spacing:0.05em; text-transform:uppercase; white-space:nowrap;
+}
+.season-table th.num, .season-table td.num { text-align:center; }
+.season-table td { padding:9px 9px; color:var(--text); border-top:0.5px solid var(--border); }
+.season-table tbody tr:hover { background:var(--bg-secondary); }
+.season-table .s-pts { font-weight:700; font-size:14px; }
+.season-table .s-med { font-weight:700; color:var(--purple-text); font-size:13px; }
+.season-summary-btn {
+  margin-top:1rem; display:flex; justify-content:center;
+}
+
+/* ── HISTORY SEASON DROPDOWN ────────────────────────── */
+.history-season-bar {
+  display:flex; align-items:center; gap:10px;
+  padding:0.75rem 1.5rem 0; flex-wrap:wrap;
+}
+.history-season-bar label { font-size:12px; font-weight:600; color:var(--text-secondary); }
+.history-picker {
+  padding:6px 10px; border:0.5px solid var(--border-md);
+  border-radius:var(--radius-md); background:var(--bg-secondary);
+  color:var(--text); font-size:13px; font-family:inherit; outline:none;
+  transition:border-color 0.15s;
+}
+.history-picker:focus { border-color:var(--text); }
+.history-na {
+  text-align:center; padding:2.5rem; color:var(--text-tertiary); font-size:13px;
+}
+.maxed-entry { font-size:11px; padding:1px 6px; border-radius:6px;
+  background:#dcfce7; color:#14532d; font-weight:600; margin-left:4px; }
+@media (prefers-color-scheme:dark) {
+  .maxed-entry { background:#052e16; color:#86efac; }
+}
+
+/* ── SEASON MODALS / CONFIRM ─────────────────────────── */
+.end-season-preview {
+  max-height:260px; overflow-y:auto;
+  border:0.5px solid var(--border-md); border-radius:var(--radius-md);
+  margin-top:10px; font-size:13px;
+}
+.esp-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 12px; border-bottom:0.5px solid var(--border);
+  gap:8px;
+}
+.esp-row:last-child { border-bottom:none; }
+.esp-name { font-weight:600; flex:1; }
+.esp-gp   { font-size:12px; color:var(--text-secondary); }
+.esp-note { font-size:11px; }
+.season-confirm-warning {
+  background:var(--amber-bg); color:var(--amber-text);
+  border-radius:var(--radius-md); padding:10px 13px;
+  font-size:12px; margin-top:10px; line-height:1.5;
+}
+
+/* ── BLANK TABLE STATE ───────────────────────────────── */
+.season-start-cta {
+  text-align:center; padding:3rem 1.5rem; color:var(--text-secondary);
+  font-size:14px; line-height:2;
+}
+.season-start-cta i { font-size:40px; display:block; margin-bottom:12px; color:var(--text-tertiary); }
+.season-start-cta h3 { font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; }
 </style>
 </head>
 <body>
@@ -557,6 +666,7 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
       <button class="tab"        data-tab="history" onclick="switchTab('history')">Game history</button>
       <button class="tab"        data-tab="deleted" onclick="switchTab('deleted')">Deleted games <span class="tab-badge" id="deleted-badge" style="display:none">0</span></button>
       <button class="tab"        data-tab="rules"   onclick="switchTab('rules')">📋 Rules</button>
+      <button class="tab"        data-tab="seasons" onclick="switchTab('seasons')">🏆 Seasons</button>
     </div>
 
     <!-- ── TABLE TAB ─────────────────────────────── -->
@@ -585,6 +695,11 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
 
     <!-- ── HISTORY TAB ───────────────────────────── -->
     <div id="tab-history" style="display:none">
+      <div class="history-season-bar">
+        <label>Season</label>
+        <select class="history-picker" id="history-season-picker" onchange="renderHistory()">
+        </select>
+      </div>
       <div class="history-section" id="history-list"></div>
     </div>
 
@@ -595,6 +710,21 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
         Games deleted by anyone are kept here. Use Restore to bring a game back.
       </div>
       <div class="history-section" id="deleted-list"></div>
+    </div>
+
+    <!-- ── SEASONS TAB ──────────────────────────── -->
+    <div id="tab-seasons" style="display:none">
+      <div class="season-section">
+        <div class="season-select-row">
+          <label>Season</label>
+          <select class="season-picker" id="season-viewer-picker" onchange="renderSeasonView()">
+          </select>
+          <span id="season-winner-display"></span>
+        </div>
+        <div id="season-view-content"></div>
+        <div class="season-summary-btn" id="season-summary-btn"></div>
+        <div id="season-undo-btn" style="margin-top:8px;display:flex;justify-content:center"></div>
+      </div>
     </div>
 
     <!-- ── RULES TAB ─────────────────────────────── -->
@@ -960,6 +1090,55 @@ tr.relegation-row:hover { background: rgba(229,53,53,0.08); }
   </div>
 </div>
 
+<!-- End Season Confirm -->
+<div id="modal-end-season" style="display:none">
+  <div class="modal-bg" onclick="closeModals()">
+    <div class="modal" style="width:500px" onclick="event.stopPropagation()">
+      <h2>⚠️ End Season <span id="end-season-num"></span>?</h2>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;line-height:1.6">
+        This will lock the season permanently. The final standings will be saved to the Seasons tab.
+      </p>
+      <div id="end-season-standings-preview" class="end-season-preview"></div>
+      <div id="end-season-warning" class="season-confirm-warning" style="display:none"></div>
+      <div class="modal-actions">
+        <button onclick="closeModals()">Cancel</button>
+        <button class="danger" id="end-season-confirm-btn" onclick="confirmEndSeason()">End Season</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Start Season Confirm -->
+<div id="modal-start-season" style="display:none">
+  <div class="modal-bg" onclick="closeModals()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h2>🏁 Start Season <span id="start-season-num"></span></h2>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;line-height:1.6">
+        This wipes the current table and starts a fresh season. All players currently in the table will be removed — you'll add them back manually.
+      </p>
+      <div class="season-confirm-warning">
+        ⚠️ This cannot be undone without using the Season Restore feature in the Seasons tab.
+      </div>
+      <div class="modal-actions">
+        <button onclick="closeModals()">Cancel</button>
+        <button class="primary" onclick="confirmStartSeason()">Start Season</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Season Summary Card -->
+<div id="modal-season-summary" style="display:none">
+  <div class="modal-bg" onclick="closeModals()">
+    <div class="modal" style="width:420px" onclick="event.stopPropagation()">
+      <div id="season-summary-content"></div>
+      <div class="modal-actions">
+        <button onclick="closeModals()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Admin PIN Modal -->
 <div id="modal-admin-pin" style="display:none">
   <div class="modal-bg" onclick="closeModals()">
@@ -1010,7 +1189,9 @@ const TEAM_PTS_BY_FORMAT = {
   '2v2v2': [4, 2, 0]
 };
 
-const PROVISIONAL_THRESHOLD = 10;
+const PROVISIONAL_THRESHOLD = 10;  // display badge below this
+const SEASON_MAX_GAMES     = 38;   // cap per player per season (from season 3+)
+const QUALIFIED_THRESHOLD  = 20;   // min games to count toward season win (season 3+)
 
 const AVATAR_COLORS = [
   ['#DBEAFE','#1e40af'],['#D1FAE5','#065f46'],['#FEF3C7','#92400e'],
@@ -1023,9 +1204,11 @@ let players      = [];
 let games        = [];
 let deletedGames = [];
 let auditLog     = [];
+let seasons      = [];   // array of completed season snapshots
 let removeTarget      = null;
 let deleteGameTarget  = null;
 let prevRanks         = {};
+let currentSeasonNum  = null; // set after loading, = seasons.length + 1
 
 // Log game state
 let logSelectedPlayers = [];
@@ -1109,6 +1292,7 @@ function updateAdminUI() {
   const activeTab = document.querySelector('.tab.active')?.dataset.tab;
   if (activeTab === 'history') renderHistory();
   if (activeTab === 'deleted') renderDeleted();
+  if (activeTab === 'seasons') renderSeasonsTab();
 }
 
 function requireAdmin(action) {
@@ -1118,9 +1302,9 @@ function requireAdmin(action) {
 
 // ── SAVE ─────────────────────────────────────────────────
 function save() {
-  const payload = { players, games, deletedGames, auditLog };
+  const payload = { players, games, deletedGames, auditLog, seasons };
   window._lastSaved = JSON.stringify(payload);
-  if (window._fbSave) window._fbSave(players, games, deletedGames, auditLog);
+  if (window._fbSave) window._fbSave(players, games, deletedGames, auditLog, seasons);
 }
 
 // ── AUDIT LOG ─────────────────────────────────────────────
@@ -1168,15 +1352,19 @@ function getPtsForGame(g, pid) {
 }
 
 function getStats(pid) {
+  const seqNum = (seasons ? seasons.length : 0) + 1;
+  const applyCapThisSeason = seqNum >= 3; // cap only from Season 3+
   const perGamePts = [];
-  let totalPts = 0, wins = 0;
+  let totalPts = 0, wins = 0, gamesPlayedTotal = 0;
 
   for (const g of games) {
     const pts = getPtsForGame(g, pid);
     if (pts === null) continue;
+    gamesPlayedTotal++;
+    // If cap applies and this game is beyond the 38-game cap, skip for stats
+    if (applyCapThisSeason && gamesPlayedTotal > SEASON_MAX_GAMES) continue;
     perGamePts.push(pts);
     totalPts += pts;
-    // win = finished 1st (ranked index 0)
     if (g.type === 'solo') {
       if (g.rankings[0] === pid) wins++;
     } else {
@@ -1185,17 +1373,27 @@ function getStats(pid) {
     }
   }
 
-  const gp      = perGamePts.length;
+  const gp      = perGamePts.length;   // capped GP
+  const gpTotal = gamesPlayedTotal;    // actual games played (may exceed 38)
   const losses  = gp - wins;
   const avgPPG  = gp > 0 ? totalPts / gp : 0;
   const medPPG  = median(perGamePts);
   const winPct  = gp > 0 ? Math.round((wins / gp) * 100) : null;
+  const isMaxed = applyCapThisSeason && gpTotal >= SEASON_MAX_GAMES;
 
-  return { gp, totalPts, avgPPG, medPPG, winPct, wins, losses };
+  return { gp, gpTotal, totalPts, avgPPG, medPPG, winPct, wins, losses, isMaxed };
 }
 
-function getRanked() {
-  const all = players.map(p => ({ ...p, ...getStats(p.id) }));
+function getRanked(gamesList) {
+  // gamesList allows computing stats from a custom game array (e.g. season snapshot)
+  const useCustom = !!gamesList;
+  const all = players.map(p => {
+    const stats = useCustom ? getStatsFromGames(p.id, gamesList) : getStats(p.id);
+    return { ...p, ...stats };
+  });
+  const seqNum = (seasons ? seasons.length : 0) + 1;
+  const applyQual = seqNum >= 3;
+
   const established  = all.filter(p => p.gp >= PROVISIONAL_THRESHOLD);
   const provisional  = all.filter(p => p.gp > 0 && p.gp < PROVISIONAL_THRESHOLD);
   const unplayed     = all.filter(p => p.gp === 0);
@@ -1212,6 +1410,30 @@ function getRanked() {
   unplayed.sort((a, b) => a.name.localeCompare(b.name));
 
   return [...established, ...provisional, ...unplayed];
+}
+
+// Compute stats from an arbitrary games array (used for season snapshots)
+function getStatsFromGames(pid, gamesList) {
+  const perGamePts = [];
+  let totalPts = 0, wins = 0;
+  for (const g of gamesList) {
+    const pts = getPtsForGame(g, pid);
+    if (pts === null) continue;
+    perGamePts.push(pts);
+    totalPts += pts;
+    if (g.type === 'solo') {
+      if (g.rankings[0] === pid) wins++;
+    } else {
+      const t = g.rankings[0];
+      if (Array.isArray(t) && t.includes(pid)) wins++;
+    }
+  }
+  const gp     = perGamePts.length;
+  const losses = gp - wins;
+  const avgPPG = gp > 0 ? totalPts / gp : 0;
+  const medPPG = median(perGamePts);
+  const winPct = gp > 0 ? Math.round((wins / gp) * 100) : null;
+  return { gp, gpTotal: gp, totalPts, avgPPG, medPPG, winPct, wins, losses, isMaxed: false };
 }
 
 // ── BADGE ─────────────────────────────────────────────────
@@ -1239,10 +1461,8 @@ function renderTable() {
 
   const ranked = getRanked();
   const total  = ranked.length;
-  // relegation only counts established players
-  const estCount   = ranked.filter(p => p.gp >= PROVISIONAL_THRESHOLD).length;
-  const relegZone  = estCount >= 4 ? 2 : 0;
-  const relegStart = estCount - relegZone + 1; // position among established
+  const seqNum = (seasons ? seasons.length : 0) + 1;
+  const applyQual = seqNum >= 3;
 
   document.getElementById('subtitle').textContent =
     `${total} player${total !== 1 ? 's' : ''} · ${games.length} game${games.length !== 1 ? 's' : ''} played`;
@@ -1341,7 +1561,12 @@ function renderTable() {
 // ── RENDER HISTORY ────────────────────────────────────────
 function placeEmoji(i) { return ['👑','🥈','🥉','4️⃣','5️⃣','6️⃣'][i] || `${i+1}.`; }
 
-function renderGameItem(g, showDelete) {
+function resolveName(id, playerList, frozenNames) {
+  return playerList?.find(p => p.id === id)?.name || frozenNames?.[id] || '(removed)';
+}
+
+function renderGameItemWithPlayers(g, showDelete, playerList, maxedIds) {
+  maxedIds = maxedIds || [];
   const badge = g.type === 'solo'
     ? `<span class="badge solo">Solo</span>`
     : `<span class="badge team">${g.format || 'Team'}</span>`;
@@ -1354,12 +1579,22 @@ function renderGameItem(g, showDelete) {
 
     rankingsHtml = '<div class="history-rankings">';
     g.rankings.forEach((slot, i) => {
-      const names = Array.isArray(slot)
-        ? slot.map(id => players.find(p => p.id === id)?.name || g.frozenNames?.[id] || '(removed)').join(' & ')
-        : (players.find(p => p.id === slot)?.name || g.frozenNames?.[slot] || '(removed)');
-      const pts = ptsTable[i] ?? 0;
-      const ptsStr = pts > 0 ? `+${pts}pt${pts !== 1 ? 's' : ''}` : '0 pts';
-      rankingsHtml += `<div class="history-rank-row">${placeEmoji(i)} ${names} <span style="color:var(--text-tertiary);font-size:11px">${ptsStr}</span></div>`;
+      if (Array.isArray(slot)) {
+        const nameParts = slot.map(id => {
+          const nm = resolveName(id, playerList, g.frozenNames);
+          const mx = maxedIds.includes(id) ? ' <span class="maxed-entry">maxed</span>' : '';
+          return nm + mx;
+        });
+        const pts = ptsTable[i] ?? 0;
+        const ptsStr = pts > 0 ? `+${pts}pt${pts !== 1 ? 's' : ''}` : '0 pts';
+        rankingsHtml += `<div class="history-rank-row">${placeEmoji(i)} ${nameParts.join(' & ')} <span style="color:var(--text-tertiary);font-size:11px">${ptsStr}</span></div>`;
+      } else {
+        const nm  = resolveName(slot, playerList, g.frozenNames);
+        const pts = ptsTable[i] ?? 0;
+        const ptsStr = pts > 0 ? `+${pts}pt${pts !== 1 ? 's' : ''}` : '0 pts';
+        const mx = maxedIds.includes(slot) ? ' <span class="maxed-entry">maxed</span>' : '';
+        rankingsHtml += `<div class="history-rank-row">${placeEmoji(i)} ${nm}${mx} <span style="color:var(--text-tertiary);font-size:11px">${ptsStr}</span></div>`;
+      }
     });
     rankingsHtml += '</div>';
   }
@@ -1386,10 +1621,74 @@ function renderGameItem(g, showDelete) {
   </div>`;
 }
 
+function renderGameItem(g, showDelete) {
+  // Compute maxed IDs for current season (season 3+)
+  const seqN = (seasons ? seasons.length : 0) + 1;
+  let maxedIds = [];
+  if (seqN >= 3) {
+    players.forEach(p => {
+      if (getStats(p.id).isMaxed) maxedIds.push(p.id);
+    });
+  }
+  return renderGameItemWithPlayers(g, showDelete, players, maxedIds);
+}
+
+function buildHistoryPicker() {
+  const picker = document.getElementById('history-season-picker');
+  if (!picker) return;
+  const currentSeqNum = (seasons ? seasons.length : 0) + 1;
+  let opts = '';
+  for (let i = currentSeqNum; i >= 1; i--) {
+    const label = i === currentSeqNum ? `Season ${i} (current)` : `Season ${i}`;
+    opts += `<option value="${i}">${label}</option>`;
+  }
+  // preserve selection if valid
+  const cur = parseInt(picker.value);
+  picker.innerHTML = opts;
+  if (cur >= 1 && cur <= currentSeqNum) picker.value = cur;
+}
+
 function renderHistory() {
+  buildHistoryPicker();
+  const picker = document.getElementById('history-season-picker');
+  const seqNum = picker ? parseInt(picker.value) : (seasons ? seasons.length : 0) + 1;
   const el = document.getElementById('history-list');
-  if (!games.length) { el.innerHTML = '<div class="no-history"><i class="ti ti-history"></i>No games logged yet.</div>'; return; }
-  el.innerHTML = [...games].reverse().map(g => renderGameItem(g, true)).join('');
+  const currentSeqNum = (seasons ? seasons.length : 0) + 1;
+
+  if (seqNum === 1 && seasons.length >= 1) {
+    // Season 1: no game history, show N/A
+    el.innerHTML = '<div class="history-na"><i class="ti ti-history" style="font-size:28px;display:block;margin-bottom:8px"></i>Game history for Season 1 is not available (N/A).</div>';
+    return;
+  }
+
+  // Past completed season
+  if (seqNum < currentSeqNum) {
+    const snap = seasons[seqNum - 1];
+    if (!snap || !snap.games || !snap.games.length) {
+      el.innerHTML = '<div class="history-na">No games recorded for Season ' + seqNum + '.</div>';
+      return;
+    }
+    // Render from snapshot — use snapshot players for name resolution
+    const snapPlayers = snap.players || [];
+    el.innerHTML = [...snap.games].reverse().map(g => renderGameItemWithPlayers(g, false, snapPlayers, snap.maxedIds || [])).join('');
+    return;
+  }
+
+  // Current season
+  if (!games.length) {
+    el.innerHTML = '<div class="no-history"><i class="ti ti-history"></i>No games logged yet this season.</div>';
+    return;
+  }
+  const seqN = currentSeqNum;
+  const applyCapThisSeason = seqN >= 3;
+  // Build per-player game count to detect maxed entries
+  const gpCount = {};
+  const orderedGames = [...games]; // chronological
+  el.innerHTML = [...orderedGames].reverse().map(g => {
+    // Determine which players are maxed AT THE TIME of this game
+    // We compute per game by going forward in order
+    return renderGameItem(g, true);
+  }).join('');
 }
 
 function renderDeleted() {
@@ -1402,11 +1701,12 @@ function renderDeleted() {
 // ── TABS ──────────────────────────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  ['table','history','deleted','rules'].forEach(t => {
+  ['table','history','deleted','rules','seasons'].forEach(t => {
     document.getElementById('tab-' + t).style.display = t === tab ? '' : 'none';
   });
   if (tab === 'history') renderHistory();
   if (tab === 'deleted') renderDeleted();
+  if (tab === 'seasons') renderSeasonsTab();
 }
 
 // ── ADD PLAYER ────────────────────────────────────────────
@@ -1703,9 +2003,287 @@ function restoreGame(id) {
   showToast('Game restored ✓');
 }
 
+// ── SEASONS TAB ───────────────────────────────────────────
+function renderSeasonsTab() {
+  const picker = document.getElementById('season-viewer-picker');
+  const totalSeasons = seasons ? seasons.length : 0;
+  if (totalSeasons === 0) {
+    document.getElementById('season-view-content').innerHTML =
+      '<div class="no-history"><i class="ti ti-trophy"></i>No completed seasons yet.</div>';
+    document.getElementById('season-winner-display').innerHTML = '';
+    document.getElementById('season-summary-btn').innerHTML = '';
+    if (picker) picker.innerHTML = '';
+    return;
+  }
+  // Build options newest-first
+  let opts = '';
+  for (let i = totalSeasons; i >= 1; i--) {
+    opts += `<option value="${i}">Season ${i}</option>`;
+  }
+  if (picker) {
+    const prev = parseInt(picker.value);
+    picker.innerHTML = opts;
+    if (prev >= 1 && prev <= totalSeasons) picker.value = prev;
+  }
+  renderSeasonView();
+}
+
+function renderSeasonView() {
+  const picker = document.getElementById('season-viewer-picker');
+  if (!picker || !seasons || !seasons.length) return;
+  const idx = parseInt(picker.value) - 1;
+  const snap = seasons[idx];
+  if (!snap) return;
+
+  // Winner pill
+  const winnerEl = document.getElementById('season-winner-display');
+  winnerEl.innerHTML = snap.winner
+    ? `<span class="season-winner-pill">👑 Winner: ${snap.winner}</span>`
+    : '';
+
+  // Summary button
+  document.getElementById('season-summary-btn').innerHTML =
+    `<button onclick="openSeasonSummary(${idx})" style="font-size:12px;gap:5px"><i class="ti ti-chart-bar"></i> View summary card</button>`;
+
+  // Build frozen table
+  const snapPlayers = snap.players || [];
+  const snapGames   = snap.games   || [];
+
+  if (!snapPlayers.length) {
+    document.getElementById('season-view-content').innerHTML =
+      '<div class="no-history">No player data for this season.</div>';
+    return;
+  }
+
+  // Compute stats from snapshot (use legacyStats if no games)
+  const allStats = snapPlayers.map(p => {
+    const ls = snap.legacyStats?.[p.id];
+    const s  = ls || getStatsFromGames(p.id, snapGames);
+    const isNotQual = snap.seasonNum >= 3 && s.gp < QUALIFIED_THRESHOLD && s.gp > 0;
+    return { ...p, ...s, isNotQual };
+  });
+
+  const sorted = allStats.sort((a, b) =>
+    b.medPPG - a.medPPG || b.avgPPG - a.avgPPG ||
+    (b.winPct ?? 0) - (a.winPct ?? 0) || b.totalPts - a.totalPts || a.name.localeCompare(b.name));
+
+  let html = `<div class="season-table-wrap"><table class="season-table">
+    <thead><tr>
+      <th style="width:36px">#</th>
+      <th>Player</th>
+      <th class="num">GP</th><th class="num">W</th><th class="num">L</th>
+      <th class="num">Total Pts</th><th class="num">Avg PPG</th>
+      <th class="num">Med PPG</th><th class="num">Win %</th>
+    </tr></thead><tbody>`;
+
+  sorted.forEach((p, i) => {
+    const [bg, fg] = AVATAR_COLORS[(p.colorIdx || 0) % AVATAR_COLORS.length];
+    let posHtml = '';
+    if      (i === 0) posHtml = '👑';
+    else if (i === 1) posHtml = '🥈';
+    else if (i === 2) posHtml = '🥉';
+    else              posHtml = `<span style="font-weight:600;color:var(--text-secondary)">${i+1}</span>`;
+
+    const nqBadge = p.isNotQual ? '<span class="notqualified-badge" style="font-size:10px;margin-left:4px">Not Qualified</span>' : '';
+    const mxBadge = (snap.maxedIds || []).includes(p.id) ? '<span class="maxed-badge" style="font-size:10px;margin-left:4px">Maxed ✓</span>' : '';
+
+    html += `<tr>
+      <td style="text-align:center">${posHtml}</td>
+      <td><span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="avatar" style="width:26px;height:26px;font-size:10px;background:${bg};color:${fg}">${getInitials(p.name)}</span>
+        ${p.name}${nqBadge}${mxBadge}
+      </span></td>
+      <td class="num"><span class="stat">${p.gp}</span></td>
+      <td class="num"><span class="stat win-stat">${p.gp > 0 ? p.wins : '—'}</span></td>
+      <td class="num"><span class="stat loss-stat">${p.gp > 0 ? p.losses : '—'}</span></td>
+      <td class="num"><span class="s-pts">${p.totalPts}</span></td>
+      <td class="num"><span class="stat">${p.gp > 0 ? p.avgPPG.toFixed(1) : '—'}</span></td>
+      <td class="num"><span class="s-med">${p.gp > 0 ? p.medPPG.toFixed(1) : '—'}</span></td>
+      <td class="num"><span class="stat">${p.winPct !== null ? p.winPct + '%' : '—'}</span></td>
+    </tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  document.getElementById('season-view-content').innerHTML = html;
+}
+
+function openSeasonSummary(idx) {
+  const snap = seasons[idx];
+  if (!snap) return;
+  const snapPlayers = snap.players || [];
+  const snapGames   = snap.games   || [];
+  const totalGames  = snapGames.length;
+
+  const allStats = snapPlayers.map(p => ({ ...p, ...getStatsFromGames(p.id, snapGames) }))
+    .sort((a, b) => b.medPPG - a.medPPG || b.avgPPG - a.avgPPG || b.totalPts - a.totalPts);
+
+  const top3 = allStats.slice(0, 3);
+  const medals = ['🥇','🥈','🥉'];
+
+  const top3Html = top3.map((p, i) =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border)">
+      <span style="font-weight:600">${medals[i]} ${p.name}</span>
+      <span style="font-size:12px;color:var(--text-secondary)">${p.totalPts} pts · Med ${p.gp > 0 ? p.medPPG.toFixed(1) : '—'} · ${p.winPct ?? 0}% WR</span>
+    </div>`
+  ).join('');
+
+  document.getElementById('season-summary-content').innerHTML = `
+    <h2>Season ${snap.seasonNum} Summary</h2>
+    <div style="margin:1rem 0;display:flex;gap:20px;flex-wrap:wrap">
+      <div style="text-align:center;flex:1">
+        <div style="font-size:28px">👑</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px">${snap.winner || '—'}</div>
+        <div style="font-size:12px;color:var(--text-secondary)">Season Winner</div>
+      </div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:28px">🎮</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px">${totalGames}</div>
+        <div style="font-size:12px;color:var(--text-secondary)">Total Games</div>
+      </div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:28px">👥</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px">${snapPlayers.length}</div>
+        <div style="font-size:12px;color:var(--text-secondary)">Players</div>
+      </div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:28px">📅</div>
+        <div style="font-size:14px;font-weight:700;margin-top:4px">${snap.endDate || '—'}</div>
+        <div style="font-size:12px;color:var(--text-secondary)">Ended</div>
+      </div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Top 3</div>
+    ${top3Html}
+  `;
+  document.getElementById('modal-season-summary').style.display = '';
+}
+
+// ── SEASON MANAGEMENT ──────────────────────────────────────
+function openEndSeason() {
+  if (!requireAdmin()) return;
+  const seqNum = (seasons ? seasons.length : 0) + 1;
+  document.getElementById('end-season-num').textContent = seqNum;
+
+  // Build standings preview
+  const ranked = getRanked();
+  const applyQual = seqNum >= 3;
+  let previewHtml = '';
+  const medals = ['👑','🥈','🥉'];
+  let pos = 1;
+  let notQualList = [];
+
+  ranked.forEach(p => {
+    const stats = getStats(p.id);
+    const gp = stats.gpTotal !== undefined ? stats.gpTotal : stats.gp;
+    const isNQ = applyQual && gp > 0 && gp < QUALIFIED_THRESHOLD;
+    const isMx = !!stats.isMaxed;
+    if (isNQ) notQualList.push(p.name + ' (' + gp + ' GP)');
+
+    const posLabel = pos <= 3 ? medals[pos-1] : pos;
+    const badge = isNQ
+      ? '<span class="notqualified-badge" style="font-size:10px">Not Qualified</span>'
+      : isMx ? '<span class="maxed-badge" style="font-size:10px">Maxed</span>' : '';
+    previewHtml += `<div class="esp-row">
+      <span style="min-width:28px;text-align:center">${posLabel}</span>
+      <span class="esp-name">${p.name} ${badge}</span>
+      <span class="esp-gp">${gp} GP</span>
+    </div>`;
+    if (p.gp > 0) pos++;
+  });
+
+  document.getElementById('end-season-standings-preview').innerHTML = previewHtml || '<div style="padding:12px;color:var(--text-tertiary)">No players</div>';
+
+  const warn = document.getElementById('end-season-warning');
+  if (notQualList.length) {
+    warn.style.display = '';
+    warn.innerHTML = `⚠️ <strong>${notQualList.length} player${notQualList.length > 1 ? 's' : ''} not qualified</strong> (under ${QUALIFIED_THRESHOLD} games): ${notQualList.join(', ')}. They will appear in the season record but won't count toward the season result.`;
+  } else {
+    warn.style.display = 'none';
+  }
+
+  document.getElementById('modal-end-season').style.display = '';
+}
+
+function confirmEndSeason() {
+  if (!requireAdmin()) return;
+  const seqNum = (seasons ? seasons.length : 0) + 1;
+
+  // Determine winner (top qualified player)
+  const ranked = getRanked();
+  const applyQual = seqNum >= 3;
+  let winner = null;
+  for (const p of ranked) {
+    const gp = getStats(p.id).gpTotal ?? getStats(p.id).gp;
+    if (!applyQual || gp >= QUALIFIED_THRESHOLD) {
+      winner = p.name;
+      break;
+    }
+  }
+
+  // Build maxed IDs list
+  const maxedIds = players.filter(p => getStats(p.id).isMaxed).map(p => p.id);
+
+  // Save snapshot
+  const snap = {
+    seasonNum: seqNum,
+    winner,
+    players:   JSON.parse(JSON.stringify(players)),
+    games:     JSON.parse(JSON.stringify(games)),
+    maxedIds,
+    endDate: new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }),
+  };
+  seasons.push(snap);
+
+  // Wipe current season
+  players      = [];
+  games        = [];
+  prevRanks    = {};
+
+  audit('season_ended', { seasonNum: seqNum, winner });
+  save();
+  closeModals();
+  renderTable();
+  renderSeasonsTab();
+  showToast(`Season ${seqNum} ended — ${winner || 'no winner'} wins! 🏆`);
+}
+
+function openStartSeason() {
+  if (!requireAdmin()) return;
+  const seqNum = (seasons ? seasons.length : 0) + 1;
+  document.getElementById('start-season-num').textContent = seqNum;
+  document.getElementById('modal-start-season').style.display = '';
+}
+
+function confirmStartSeason() {
+  if (!requireAdmin()) return;
+  // Table is already blank (wiped by end season or initial state)
+  // Just close the modal; admin adds players via Add Player
+  closeModals();
+  showToast('Season started — add your players!');
+  renderTable();
+}
+
+// ── SEASON UNDO (Restore deleted season) ─────────────────
+// Accessible from Seasons tab — restores the last ended season
+function undoLastSeason() {
+  if (!requireAdmin()) return;
+  if (!seasons || !seasons.length) { showToast('No seasons to restore'); return; }
+  if (players.length || games.length) {
+    if (!confirm('Restoring the last season will overwrite the current active table. Continue?')) return;
+  }
+  const snap = seasons.pop();
+  players   = snap.players ? JSON.parse(JSON.stringify(snap.players)) : [];
+  games     = snap.games   ? JSON.parse(JSON.stringify(snap.games))   : [];
+  prevRanks = {};
+  audit('season_restored', { seasonNum: snap.seasonNum });
+  save();
+  renderTable();
+  renderSeasonsTab();
+  showToast(`Season ${snap.seasonNum} restored ↩`);
+}
+
 // ── CLOSE MODALS ──────────────────────────────────────────
 function closeModals() {
-  ['modal-add','modal-log','modal-remove','modal-delete-game','modal-admin-pin'].forEach(id => {
+  ['modal-add','modal-log','modal-remove','modal-delete-game','modal-admin-pin','modal-end-season','modal-start-season','modal-season-summary'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
 }
@@ -1773,11 +2351,59 @@ function migrateGames(gamesList) {
 }
 
 // ── INIT ──────────────────────────────────────────────────
+function seedLegacySeasons() {
+  // Season 1 — Khaled wins (data from screenshot, no game logs available)
+  if (seasons.length >= 1) return; // already seeded
+  const s1Players = [
+    {id:'s1_khaled', name:'Khaled',  colorIdx:0},
+    {id:'s1_ayan',   name:'Ayan',    colorIdx:1},
+    {id:'s1_abdulla',name:'Abdulla', colorIdx:2},
+    {id:'s1_alex',   name:'Alex',    colorIdx:3},
+    {id:'s1_laksan', name:'Laksan',  colorIdx:4},
+    {id:'s1_henock', name:'Henock',  colorIdx:5},
+    {id:'s1_aryan',  name:'Aryan',   colorIdx:6},
+    {id:'s1_zayan',  name:'Zayan',   colorIdx:7},
+    {id:'s1_saad',   name:'Saad',    colorIdx:8},
+  ];
+  // No real game logs for S1 — store empty games, stats reconstructed from screenshot
+  // We encode stats directly as a fake single-game snapshot per player for display
+  // Actually we'll store the final table as player records with pre-computed stats baked in
+  // so the season view can display them without recomputing from games
+  const s1Snap = {
+    seasonNum: 1,
+    winner: 'Khaled',
+    players: s1Players,
+    games: [],   // N/A
+    maxedIds: [],
+    endDate: 'June 2026',
+    // Pre-computed display stats for legacy display
+    legacyStats: {
+      's1_khaled':  {gp:5,  wins:4,  losses:1,  totalPts:15, avgPPG:3.0, medPPG:3.0, winPct:80},
+      's1_ayan':    {gp:28, wins:11, losses:17, totalPts:59, avgPPG:2.1, medPPG:2.0, winPct:39},
+      's1_abdulla': {gp:18, wins:7,  losses:11, totalPts:30, avgPPG:1.7, medPPG:2.0, winPct:39},
+      's1_alex':    {gp:12, wins:5,  losses:7,  totalPts:29, avgPPG:2.4, medPPG:2.0, winPct:42},
+      's1_laksan':  {gp:7,  wins:2,  losses:5,  totalPts:16, avgPPG:2.3, medPPG:2.0, winPct:29},
+      's1_henock':  {gp:31, wins:7,  losses:24, totalPts:47, avgPPG:1.5, medPPG:1.0, winPct:23},
+      's1_aryan':   {gp:14, wins:4,  losses:10, totalPts:20, avgPPG:1.4, medPPG:1.0, winPct:29},
+      's1_zayan':   {gp:1,  wins:0,  losses:1,  totalPts:0,  avgPPG:0.0, medPPG:0.0, winPct:0},
+      's1_saad':    {gp:0,  wins:0,  losses:0,  totalPts:0,  avgPPG:0,   medPPG:0,   winPct:null},
+    }
+  };
+  seasons.push(s1Snap);
+}
+
 function init() {
   if (window._firebaseReady && window._fbLoad) {
-    window._fbLoad();
+    window._fbLoad().then(() => {
+      seedLegacySeasons();
+      // Season 2 will be seeded from current live data when admin ends it
+    });
   } else {
-    document.addEventListener('firebase-ready', () => window._fbLoad(), { once: true });
+    document.addEventListener('firebase-ready', () => {
+      window._fbLoad().then(() => {
+        seedLegacySeasons();
+      });
+    }, { once: true });
   }
 }
 
