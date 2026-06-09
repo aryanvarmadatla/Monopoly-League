@@ -62,7 +62,10 @@
         games: serializeGames(games),
         deletedGames: serializeGames(deletedGames),
         auditLog: auditLog || [],
-        seasons: seasons || []
+        seasons: (seasons || []).map(snap => ({
+          ...snap,
+          games: serializeGames(snap.games || [])
+        }))
       });
     } catch (e) {
       console.error("Firebase save error:", e);
@@ -80,7 +83,10 @@
     games        = deserializeGames(data.games        || []);
     deletedGames = deserializeGames(data.deletedGames || []);
     auditLog     = data.auditLog  || [];
-    seasons      = data.seasons   || [];
+    seasons = (data.seasons || []).map(snap => ({
+      ...snap,
+      games: deserializeGames(snap.games || [])
+    }));
     prevRanks = {};
     renderTable();
     const activeTab = document.querySelector('.tab.active')?.dataset.tab;
@@ -101,7 +107,10 @@
         games        = deserializeGames(data.games        || []);
         deletedGames = deserializeGames(data.deletedGames || []);
         auditLog     = data.auditLog  || [];
-        seasons      = data.seasons   || [];
+        seasons = (data.seasons || []).map(snap => ({
+          ...snap,
+          games: deserializeGames(snap.games || [])
+        }));
         window._lastSaved = JSON.stringify(data);
 
         // Run migration — converts any old-format games to new rankings structure
