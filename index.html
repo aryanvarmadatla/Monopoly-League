@@ -1284,7 +1284,7 @@ async function checkPin() {
     document.getElementById('pin-error').textContent = 'PIN not set — add adminPin to Firebase';
     pinBuffer = ''; updatePinDots(); return;
   }
-  const hashed = await sha256(pinBuffer);
+  const hashed = await sha256('mleague_' + pinBuffer + '_2026');
   if (hashed === _adminHash) {
     isAdmin = true;
     closeModals();
