@@ -681,7 +681,7 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
     </div>
 
     <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;text-align:right;padding-right:1.5rem;">
-      Version 8.5
+      Version 9
     </div>
 
     <div class="tabs">
@@ -1233,93 +1233,124 @@ let teamAssignments    = [];
 let teamRankOrder      = [];
 
 // ── ADMIN MODE ────────────────────────────────────────────
-// PIN hash is stored in Firebase (adminPin field) — nothing sensitive in source.
+// All admin state is inside a closure — isAdmin is NOT a global variable.
+// This prevents console overrides like: isAdmin = true
+// Salt + hash both stored in Firebase config doc. Nothing sensitive in source.
 
-let isAdmin    = false;
-let pinBuffer  = '';
-let _adminHash = null;  // loaded from Firebase on init
+const _admin = (() => {
+  let _on      = false;   // actual admin state — inaccessible from console
+  let _hash    = null;    // loaded from Firebase config
+  let _salt    = null;    // loaded from Firebase config
+  let _buf     = '';      // PIN buffer
+  let _attempts = 0;      // wrong attempt counter
+  const MAX_ATTEMPTS = 5;
 
-// Called from _fbLoad after data is fetched — grabs adminPin from Firestore doc
-function loadAdminHash(data) {
-  if (data && data.adminPin) _adminHash = data.adminPin;
-}
-
-// SHA-256 hash using the browser's built-in crypto API (no libraries needed)
-async function sha256(str) {
-  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-function adminBarClick() {
-  if (isAdmin) {
-    isAdmin = false;
-    updateAdminUI();
-    showToast('Admin mode off');
-} else {
-    // Re-fetch PIN hash in case it wasn't ready on page load
-    if (!_adminHash && window._loadAdminPin) window._loadAdminPin();
-    pinBuffer = '';
-    updatePinDots();
-    document.getElementById('pin-error').textContent = '';
-    document.getElementById('modal-admin-pin').style.display = '';
+  // SHA-256 using browser built-in crypto
+  async function _sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
   }
-}
 
-function pinKey(k) {
-  if (k === 'back') {
-    pinBuffer = pinBuffer.slice(0, -1);
-    updatePinDots();
-    return;
+  function _updateDots() {
+    for (let i = 0; i < 4; i++) {
+      document.getElementById('pd' + i).classList.toggle('filled', i < _buf.length);
+    }
   }
-  if (pinBuffer.length >= 4) return;
-  pinBuffer += k;
-  updatePinDots();
-  if (pinBuffer.length === 4) {
-    setTimeout(checkPin, 120); // tiny delay so last dot fills visually
-  }
-}
 
-async function checkPin() {
-  if (!_adminHash) {
-    document.getElementById('pin-error').textContent = 'PIN not set — add adminPin to Firebase';
-    pinBuffer = ''; updatePinDots(); return;
+  function _lockout() {
+    document.getElementById('pin-error').textContent =
+      `Too many attempts — reload the page to try again`;
+    document.querySelectorAll('.pin-key').forEach(b => b.disabled = true);
   }
-  const hashed = await sha256('mleague_' + pinBuffer + '_2026');
-  if (hashed === _adminHash) {
-    isAdmin = true;
-    closeModals();
-    updateAdminUI();
-    showToast('Admin mode on 🔑');
-  } else {
-    document.getElementById('pin-error').textContent = 'Wrong PIN — try again';
-    pinBuffer = '';
-    updatePinDots();
-  }
-}
 
-function updatePinDots() {
-  for (let i = 0; i < 4; i++) {
-    document.getElementById('pd' + i).classList.toggle('filled', i < pinBuffer.length);
-  }
-}
+  return {
+    get isAdmin() { return _on; },
+
+    loadFromFirebase(data) {
+      if (data && data.adminPin)  _hash = data.adminPin;
+      if (data && data.adminSalt) _salt = data.adminSalt;
+    },
+
+    barClick() {
+      if (_on) {
+        _on = false;
+        _updateAdminUI();
+        showToast('Admin mode off');
+      } else {
+        if (!_hash && window._loadAdminPin) window._loadAdminPin();
+        _buf = '';
+        _updateDots();
+        document.getElementById('pin-error').textContent = '';
+        document.querySelectorAll('.pin-key').forEach(b => b.disabled = false);
+        document.getElementById('modal-admin-pin').style.display = '';
+      }
+    },
+
+    keyPress(k) {
+      if (_attempts >= MAX_ATTEMPTS) return;
+      if (k === 'back') { _buf = _buf.slice(0, -1); _updateDots(); return; }
+      if (_buf.length >= 4) return;
+      _buf += k;
+      _updateDots();
+      if (_buf.length === 4) setTimeout(() => this.checkPin(), 120);
+    },
+
+    async checkPin() {
+      if (!_hash || !_salt) {
+        document.getElementById('pin-error').textContent =
+          'PIN not configured — add adminPin + adminSalt to Firebase config';
+        _buf = ''; _updateDots(); return;
+      }
+      if (_attempts >= MAX_ATTEMPTS) { _lockout(); return; }
+
+      const hashed = await _sha256(_salt + _buf);
+      if (hashed === _hash) {
+        _on = true;
+        _attempts = 0;
+        closeModals();
+        _updateAdminUI();
+        showToast('Admin mode on 🔑');
+      } else {
+        _attempts++;
+        if (_attempts >= MAX_ATTEMPTS) {
+          _lockout();
+        } else {
+          const left = MAX_ATTEMPTS - _attempts;
+          document.getElementById('pin-error').textContent =
+            `Wrong PIN — ${left} attempt${left !== 1 ? 's' : ''} left`;
+        }
+        _buf = ''; _updateDots();
+      }
+    }
+  };
+})();
+
+// These thin wrappers keep the HTML onclick attributes working unchanged
+function adminBarClick()     { _admin.barClick(); }
+function pinKey(k)           { _admin.keyPress(k); }
+function checkPin()          { _admin.checkPin(); }
+function updatePinDots()     { /* handled inside closure */ }
+
+// Called from Firebase load — pulls hash + salt from config doc
+function loadAdminHash(data) { _admin.loadFromFirebase(data); }
 
 function updateAdminUI() {
-  const bar   = document.getElementById('admin-bar');
-  const label = document.getElementById('admin-bar-label');
+  const _isAdm = _admin.isAdmin;
+  const bar     = document.getElementById('admin-bar');
+  const label   = document.getElementById('admin-bar-label');
   const btnAdd  = document.getElementById('btn-add-player');
   const btnLog  = document.getElementById('btn-log-game');
-  if (isAdmin) {
+  if (_isAdm) {
     bar.classList.remove('inactive');
     label.textContent = 'Admin — tap to exit';
-    btnAdd.style.display  = '';
-    btnLog.style.display  = '';
+    btnAdd.style.display = '';
+    btnLog.style.display = '';
   } else {
     bar.classList.add('inactive');
     label.textContent = 'Admin';
-    btnAdd.style.display  = 'none';
-    btnLog.style.display  = 'none';
+    btnAdd.style.display = 'none';
+    btnLog.style.display = 'none';
   }
-  // Re-render so delete buttons appear/disappear
   renderTable();
   const activeTab = document.querySelector('.tab.active')?.dataset.tab;
   if (activeTab === 'history') renderHistory();
@@ -1327,8 +1358,8 @@ function updateAdminUI() {
   if (activeTab === 'seasons') renderSeasonsTab();
 }
 
-function requireAdmin(action) {
-  if (!isAdmin) { showToast('Admin mode required 🔐'); return false; }
+function requireAdmin() {
+  if (!_admin.isAdmin) { showToast('Admin mode required 🔐'); return false; }
   return true;
 }
 
@@ -1495,7 +1526,7 @@ function renderTable() {
   const useQual  = seqNum >= 3;
 
   if (!players.length) {
-    body.innerHTML = `<tr><td colspan="11"><div class="empty-state"><i class="ti ti-users"></i>No players yet.<br>${isAdmin ? 'Hit "Add player" to get started.' : 'Season ' + seqNum + ' — no players yet.'}</div></td></tr>`;
+    body.innerHTML = `<tr><td colspan="11"><div class="empty-state"><i class="ti ti-users"></i>No players yet.<br>${_admin.isAdmin ? 'Hit "Add player" to get started.' : 'Season ' + seqNum + ' — no players yet.'}</div></td></tr>`;
     document.getElementById('subtitle').textContent = '0 players · 0 games played';
     prevRanks = {};
     updateSeasonBar();
@@ -1567,7 +1598,7 @@ function renderTable() {
       <td class="num"><div class="cell-inner"><span class="${medClass}">${medDisplay}</span></div></td>
       <td class="num"><div class="cell-inner"><span class="stat">${winDisplay}</span></div></td>
       <td class="num"><div class="cell-inner">
-        ${isAdmin?`<button class="danger" onclick="openRemove('${p.id}','${p.name.replace(/'/g,"\'")}')"><i class="ti ti-trash"></i></button>`:''}
+        ${_admin.isAdmin?`<button class="danger" onclick="openRemove('${p.id}','${p.name.replace(/'/g,"\'")}')"><i class="ti ti-trash"></i></button>`:''}
       </div></td>
     </tr>`;
   });
@@ -1584,7 +1615,7 @@ function renderTable() {
 function updateSeasonBar() {
   const old = document.getElementById('season-admin-bar');
   if (old) old.remove();
-  if (!isAdmin) return;
+  if (!_admin.isAdmin) return;
   const seqNum = seasons.length + 1;
   const wrap   = document.querySelector('.table-wrap');
   if (!wrap) return;
@@ -1648,7 +1679,7 @@ function renderGameItem(g, showDelete, playerList, maxedSet) {
     rankingsHtml += '</div>';
   }
 
-  const actionBtn = isAdmin
+  const actionBtn = _admin.isAdmin
     ? (showDelete
         ? `<button class="danger" onclick="openDeleteGame('${g.id}')" title="Delete"><i class="ti ti-trash"></i></button>`
         : `<button class="restore" onclick="restoreGame('${g.id}')"><i class="ti ti-arrow-back-up"></i> Restore</button>`)
@@ -2075,7 +2106,7 @@ function renderSeasonsTab() {
   // Undo button
   const undoDiv = document.getElementById('season-undo-btn');
   if (undoDiv) {
-    undoDiv.innerHTML = isAdmin
+    undoDiv.innerHTML = _admin.isAdmin
       ? `<button style="font-size:11px;padding:5px 10px;color:var(--text-tertiary);gap:4px" onclick="undoLastSeason()"><i class="ti ti-arrow-back-up"></i> Restore Season ${total}</button>`
       : '';
   }
