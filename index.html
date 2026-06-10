@@ -2150,21 +2150,33 @@ function renderSeasonView() {
   document.getElementById('season-tab-content').innerHTML = html;
 }
 
-function openSeasonSummary(idx) {
-  const snap = seasons[idx];
-  if (!snap) return;
-  const snapPlayers = snap.players || [];
-  const snapGames   = snap.games   || [];
-  const ranked = getRankedFromSnapshot(snapPlayers, snapGames, snap.seasonNum);
-  const top3   = ranked.filter(p => (p.legacyStat||p).gp > 0).slice(0,3);
-  const medals = ['🥇','🥈','🥉'];
-  const top3Html = top3.map((p,i) => {
-    const st = p.legacyStat || p;
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border)">
+  function openSeasonSummary(idx) {
+    const snap = seasons[idx];
+    if (!snap) return;
+    const snapPlayers = snap.players || [];
+    const snapGames   = snap.games   || [];
+    const totalGames  = snapGames.length || (snap.seasonNum <= 2 ? '—' : 0);
+
+    // Use legacyStat if available, otherwise compute from games
+    const allStats = snapPlayers.map(p => ({
+    ...p, ...(p.legacyStat || getStatsFromGames(p.id, snapGames))
+    }));
+
+  // Respect pre-ranked order for legacy seasons, otherwise sort normally
+    if (snap.preRanked) {
+      allStats.sort((a, b) => ((a.legacyStat?.rank) || 99) - ((b.legacyStat?.rank) || 99));
+    } else {
+      allStats.sort((a, b) => b.medPPG - a.medPPG || b.avgPPG - a.avgPPG || b.totalPts - a.totalPts);
+    }
+
+    const top3   = allStats.filter(p => p.gp > 0).slice(0, 3);
+    const medals = ['🥇','🥈','🥉'];
+    const top3Html = top3.map((p, i) =>
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border)">
       <span style="font-weight:600">${medals[i]} ${p.name}</span>
-      <span style="font-size:12px;color:var(--text-secondary)">${st.totalPts} pts · Med ${st.gp>0?st.medPPG.toFixed(1):'—'} · ${st.winPct??0}% WR</span>
-    </div>`;
-  }).join('');
+      <span style="font-size:12px;color:var(--text-secondary)">${p.totalPts} pts · Med ${p.gp>0?p.medPPG.toFixed(1):'—'} · ${p.winPct??0}% WR</span>
+    </div>`
+  ).join('');
 
   document.getElementById('season-summary-content').innerHTML = `
     <h2>Season ${snap.seasonNum} Summary</h2>
