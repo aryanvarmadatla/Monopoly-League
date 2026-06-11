@@ -1162,7 +1162,7 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
   <div class="modal-bg" onclick="closeModals()">
     <div class="modal" style="width:320px;text-align:center" onclick="event.stopPropagation()">
       <h2>🔐 Admin login</h2>
-      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px">Enter the 8-digit PIN</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px">Enter the 6-digit PIN</p>
       <div class="pin-dots">
         <div class="pin-dot" id="pd0"></div>
         <div class="pin-dot" id="pd1"></div>
@@ -1170,8 +1170,6 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
         <div class="pin-dot" id="pd3"></div>
         <div class="pin-dot" id="pd4"></div>
         <div class="pin-dot" id="pd5"></div>
-        <div class="pin-dot" id="pd6"></div>
-        <div class="pin-dot" id="pd7"></div>
       </div>
       <div class="pin-error" id="pin-error"></div>
       <div class="pin-pad">
@@ -1257,7 +1255,7 @@ const _admin = (() => {
   }
 
   function _updateDots() {
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
       document.getElementById('pd' + i).classList.toggle('filled', i < _buf.length);
     }
   }
@@ -1319,10 +1317,10 @@ const _admin = (() => {
     keyPress(k) {
       if (_attempts >= MAX_ATTEMPTS) return;
       if (k === 'back') { _buf = _buf.slice(0, -1); _updateDots(); return; }
-      if (_buf.length >= 8) return;
+      if (_buf.length >= 6) return;
       _buf += k;
       _updateDots();
-      if (_buf.length === 8) setTimeout(() => this.checkPin(), 120);
+      if (_buf.length === 6) setTimeout(() => this.checkPin(), 120);
     },
 
     async checkPin() {
