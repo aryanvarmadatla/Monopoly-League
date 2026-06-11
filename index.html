@@ -271,9 +271,9 @@ button.restore:hover { background: var(--green-bg); }
 .admin-bar.inactive .admin-dot { background: var(--text-tertiary); }
 
 /* Admin PIN modal */
-.pin-dots { display: flex; gap: 10px; justify-content: center; margin: 1rem 0 0.5rem; }
+.pin-dots { display: flex; gap: 8px; justify-content: center; margin: 1rem 0 0.5rem; flex-wrap: wrap; }
 .pin-dot {
-  width: 14px; height: 14px; border-radius: 50%;
+  width: 12px; height: 12px; border-radius: 50%;
   background: var(--bg-tertiary); border: 1.5px solid var(--border-md);
   transition: background 0.15s;
 }
@@ -682,7 +682,7 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
     </div>
 
     <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;text-align:right;padding-right:1.5rem;">
-      Version 9.5
+      Version 10
     </div>
 
     <div class="tabs">
@@ -1162,12 +1162,14 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
   <div class="modal-bg" onclick="closeModals()">
     <div class="modal" style="width:320px;text-align:center" onclick="event.stopPropagation()">
       <h2>🔐 Admin login</h2>
-      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px">Enter the 4-digit PIN</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px">Enter the 6-digit PIN</p>
       <div class="pin-dots">
         <div class="pin-dot" id="pd0"></div>
         <div class="pin-dot" id="pd1"></div>
         <div class="pin-dot" id="pd2"></div>
         <div class="pin-dot" id="pd3"></div>
+        <div class="pin-dot" id="pd4"></div>
+        <div class="pin-dot" id="pd5"></div>
       </div>
       <div class="pin-error" id="pin-error"></div>
       <div class="pin-pad">
@@ -1244,7 +1246,7 @@ const _admin = (() => {
   let _salt    = null;    // loaded from Firebase config
   let _buf     = '';      // PIN buffer
   let _attempts = 0;      // wrong attempt counter
-  const MAX_ATTEMPTS = 5;
+  const MAX_ATTEMPTS = 3;
 
   // SHA-256 using browser built-in crypto
   async function _sha256(str) {
@@ -1253,19 +1255,41 @@ const _admin = (() => {
   }
 
   function _updateDots() {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 6; i++) {
       document.getElementById('pd' + i).classList.toggle('filled', i < _buf.length);
     }
   }
 
   function _lockout() {
     document.getElementById('pin-error').textContent =
-      `Too many attempts — reload the page to try again`;
+      'Too many wrong attempts — you are permanently locked out.';
     document.querySelectorAll('.pin-key').forEach(b => b.disabled = true);
+    document.querySelector('.pin-pad').style.opacity = '0.3';
+  }
+
+  // Keyboard support
+  function _onKeydown(e) {
+    if (_attempts >= MAX_ATTEMPTS) return;
+    if (e.key >= '0' && e.key <= '9') {
+      _admin.keyPress(e.key);
+    } else if (e.key === 'Backspace') {
+      _admin.keyPress('back');
+    } else if (e.key === 'Escape') {
+      closeModals();
+    }
+  }
+  function _attachKeyboardListener() {
+    document.removeEventListener('keydown', _onKeydown);
+    document.addEventListener('keydown', _onKeydown);
+  }
+  function _removeKeyboardListener() {
+    document.removeEventListener('keydown', _onKeydown);
   }
 
   return {
     get isAdmin() { return _on; },
+
+    removeKeyboard() { _removeKeyboardListener(); },
 
     loadFromFirebase(data) {
       if (data && data.adminPin)  _hash = data.adminPin;
@@ -1275,6 +1299,7 @@ const _admin = (() => {
     barClick() {
       if (_on) {
         _on = false;
+        _removeKeyboardListener();
         _updateAdminUI();
         showToast('Admin mode off');
       } else {
@@ -1283,17 +1308,19 @@ const _admin = (() => {
         _updateDots();
         document.getElementById('pin-error').textContent = '';
         document.querySelectorAll('.pin-key').forEach(b => b.disabled = false);
+        document.querySelector('.pin-pad') && (document.querySelector('.pin-pad').style.opacity = '1');
         document.getElementById('modal-admin-pin').style.display = '';
+        _attachKeyboardListener();
       }
     },
 
     keyPress(k) {
       if (_attempts >= MAX_ATTEMPTS) return;
       if (k === 'back') { _buf = _buf.slice(0, -1); _updateDots(); return; }
-      if (_buf.length >= 4) return;
+      if (_buf.length >= 6) return;
       _buf += k;
       _updateDots();
-      if (_buf.length === 4) setTimeout(() => this.checkPin(), 120);
+      if (_buf.length === 6) setTimeout(() => this.checkPin(), 120);
     },
 
     async checkPin() {
@@ -1318,7 +1345,7 @@ const _admin = (() => {
         } else {
           const left = MAX_ATTEMPTS - _attempts;
           document.getElementById('pin-error').textContent =
-            `Wrong PIN — ${left} attempt${left !== 1 ? 's' : ''} left`;
+            `Wrong PIN — ${left} attempt${left !== 1 ? 's' : ''} left before permanent lockout`;
         }
         _buf = ''; _updateDots();
       }
@@ -2329,6 +2356,7 @@ function undoLastSeason() {
 
 // ── CLOSE MODALS ──────────────────────────────────────────
 function closeModals() {
+  if (typeof _admin !== 'undefined') _admin.removeKeyboard?.();
   ['modal-add','modal-log','modal-remove','modal-delete-game','modal-admin-pin','modal-end-season','modal-start-season','modal-season-summary'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
