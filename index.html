@@ -682,7 +682,7 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
     </div>
 
     <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;text-align:right;padding-right:1.5rem;">
-      Version 9.5
+      Version 9
     </div>
 
     <div class="tabs">
@@ -1293,7 +1293,7 @@ const _admin = (() => {
       if (_buf.length >= 4) return;
       _buf += k;
       _updateDots();
-      if (_buf.length === 4) setTimeout(() => this.checkPin(), 120);
+      if (_buf.length === 4) setTimeout(() => _admin.checkPin(), 120);
     },
 
     async checkPin() {
