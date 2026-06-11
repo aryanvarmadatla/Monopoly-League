@@ -682,7 +682,7 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
     </div>
 
     <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;text-align:right;padding-right:1.5rem;">
-      Version 10
+      Version 9
     </div>
 
     <div class="tabs">
@@ -1162,14 +1162,12 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
   <div class="modal-bg" onclick="closeModals()">
     <div class="modal" style="width:320px;text-align:center" onclick="event.stopPropagation()">
       <h2>🔐 Admin login</h2>
-      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px">Enter the 6-digit PIN</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px">Enter the 4-digit PIN</p>
       <div class="pin-dots">
         <div class="pin-dot" id="pd0"></div>
         <div class="pin-dot" id="pd1"></div>
         <div class="pin-dot" id="pd2"></div>
         <div class="pin-dot" id="pd3"></div>
-        <div class="pin-dot" id="pd4"></div>
-        <div class="pin-dot" id="pd5"></div>
       </div>
       <div class="pin-error" id="pin-error"></div>
       <div class="pin-pad">
@@ -1255,7 +1253,7 @@ const _admin = (() => {
   }
 
   function _updateDots() {
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 4; i++) {
       document.getElementById('pd' + i).classList.toggle('filled', i < _buf.length);
     }
   }
@@ -1276,10 +1274,10 @@ const _admin = (() => {
       e.preventDefault();
       // Call internal functions directly (not via _admin which is not yet in scope here)
       if (_attempts >= MAX_ATTEMPTS) return;
-      if (_buf.length >= 6) return;
+      if (_buf.length >= 4) return;
       _buf += e.key;
       _updateDots();
-      if (_buf.length === 6) setTimeout(_checkPinInternal, 120);
+      if (_buf.length === 4) setTimeout(_checkPinInternal, 120);
     } else if (e.key === 'Backspace') {
       e.preventDefault();
       _buf = _buf.slice(0, -1);
@@ -1356,10 +1354,10 @@ const _admin = (() => {
     keyPress(k) {
       if (_attempts >= MAX_ATTEMPTS) return;
       if (k === 'back') { _buf = _buf.slice(0, -1); _updateDots(); return; }
-      if (_buf.length >= 6) return;
+      if (_buf.length >= 4) return;
       _buf += k;
       _updateDots();
-      if (_buf.length === 6) setTimeout(() => this.checkPin(), 120);
+      if (_buf.length === 4) setTimeout(() => this.checkPin(), 120);
     },
 
     async checkPin() {
