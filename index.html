@@ -1270,10 +1270,20 @@ const _admin = (() => {
   // Keyboard support
   function _onKeydown(e) {
     if (_attempts >= MAX_ATTEMPTS) return;
+    // Prevent space/enter from clicking buttons behind the modal
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); return; }
     if (e.key >= '0' && e.key <= '9') {
-      _admin.keyPress(e.key);
+      e.preventDefault();
+      // Call internal functions directly (not via _admin which is not yet in scope here)
+      if (_attempts >= MAX_ATTEMPTS) return;
+      if (_buf.length >= 6) return;
+      _buf += e.key;
+      _updateDots();
+      if (_buf.length === 6) setTimeout(_checkPinInternal, 120);
     } else if (e.key === 'Backspace') {
-      _admin.keyPress('back');
+      e.preventDefault();
+      _buf = _buf.slice(0, -1);
+      _updateDots();
     } else if (e.key === 'Escape') {
       closeModals();
     }
@@ -1284,6 +1294,35 @@ const _admin = (() => {
   }
   function _removeKeyboardListener() {
     document.removeEventListener('keydown', _onKeydown);
+  }
+
+  // Internal alias so _onKeydown can call checkPin without referencing _admin
+  async function _checkPinInternal() {
+    if (!_hash || !_salt) {
+      document.getElementById('pin-error').textContent =
+        'PIN not configured — add adminPin + adminSalt to Firebase config';
+      _buf = ''; _updateDots(); return;
+    }
+    if (_attempts >= MAX_ATTEMPTS) { _lockout(); return; }
+    const hashed = await _sha256(_salt + _buf);
+    if (hashed === _hash) {
+      _on = true;
+      _attempts = 0;
+      _removeKeyboardListener();
+      closeModals();
+      _updateAdminUI();
+      showToast('Admin mode on 🔑');
+    } else {
+      _attempts++;
+      if (_attempts >= MAX_ATTEMPTS) {
+        _lockout();
+      } else {
+        const left = MAX_ATTEMPTS - _attempts;
+        document.getElementById('pin-error').textContent =
+          `Wrong PIN — ${left} attempt${left !== 1 ? 's' : ''} left before permanent lockout`;
+      }
+      _buf = ''; _updateDots();
+    }
   }
 
   return {
