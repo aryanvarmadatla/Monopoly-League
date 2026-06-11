@@ -1293,7 +1293,7 @@ const _admin = (() => {
       if (_buf.length >= 4) return;
       _buf += k;
       _updateDots();
-      if (_buf.length === 4) setTimeout(() => _admin.checkPin(), 120);
+      if (_buf.length === 4) setTimeout(() => this.checkPin(), 120);
     },
 
     async checkPin() {
