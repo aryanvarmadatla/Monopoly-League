@@ -271,9 +271,9 @@ button.restore:hover { background: var(--green-bg); }
 .admin-bar.inactive .admin-dot { background: var(--text-tertiary); }
 
 /* Admin PIN modal */
-.pin-dots { display: flex; gap: 8px; justify-content: center; margin: 1rem 0 0.5rem; flex-wrap: wrap; }
+.pin-dots { display: flex; gap: 10px; justify-content: center; margin: 1rem 0 0.5rem; }
 .pin-dot {
-  width: 12px; height: 12px; border-radius: 50%;
+  width: 14px; height: 14px; border-radius: 50%;
   background: var(--bg-tertiary); border: 1.5px solid var(--border-md);
   transition: background 0.15s;
 }
@@ -682,7 +682,7 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
     </div>
 
     <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;text-align:right;padding-right:1.5rem;">
-      Version 9
+      Version 9.5
     </div>
 
     <div class="tabs">
@@ -1244,7 +1244,7 @@ const _admin = (() => {
   let _salt    = null;    // loaded from Firebase config
   let _buf     = '';      // PIN buffer
   let _attempts = 0;      // wrong attempt counter
-  const MAX_ATTEMPTS = 3;
+  const MAX_ATTEMPTS = 5;
 
   // SHA-256 using browser built-in crypto
   async function _sha256(str) {
@@ -1260,73 +1260,12 @@ const _admin = (() => {
 
   function _lockout() {
     document.getElementById('pin-error').textContent =
-      'Too many wrong attempts — you are permanently locked out.';
+      `Too many attempts — reload the page to try again`;
     document.querySelectorAll('.pin-key').forEach(b => b.disabled = true);
-    document.querySelector('.pin-pad').style.opacity = '0.3';
-  }
-
-  // Keyboard support
-  function _onKeydown(e) {
-    if (_attempts >= MAX_ATTEMPTS) return;
-    // Prevent space/enter from clicking buttons behind the modal
-    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); return; }
-    if (e.key >= '0' && e.key <= '9') {
-      e.preventDefault();
-      // Call internal functions directly (not via _admin which is not yet in scope here)
-      if (_attempts >= MAX_ATTEMPTS) return;
-      if (_buf.length >= 4) return;
-      _buf += e.key;
-      _updateDots();
-      if (_buf.length === 4) setTimeout(_checkPinInternal, 120);
-    } else if (e.key === 'Backspace') {
-      e.preventDefault();
-      _buf = _buf.slice(0, -1);
-      _updateDots();
-    } else if (e.key === 'Escape') {
-      closeModals();
-    }
-  }
-  function _attachKeyboardListener() {
-    document.removeEventListener('keydown', _onKeydown);
-    document.addEventListener('keydown', _onKeydown);
-  }
-  function _removeKeyboardListener() {
-    document.removeEventListener('keydown', _onKeydown);
-  }
-
-  // Internal alias so _onKeydown can call checkPin without referencing _admin
-  async function _checkPinInternal() {
-    if (!_hash || !_salt) {
-      document.getElementById('pin-error').textContent =
-        'PIN not configured — add adminPin + adminSalt to Firebase config';
-      _buf = ''; _updateDots(); return;
-    }
-    if (_attempts >= MAX_ATTEMPTS) { _lockout(); return; }
-    const hashed = await _sha256(_salt + _buf);
-    if (hashed === _hash) {
-      _on = true;
-      _attempts = 0;
-      _removeKeyboardListener();
-      closeModals();
-      _updateAdminUI();
-      showToast('Admin mode on 🔑');
-    } else {
-      _attempts++;
-      if (_attempts >= MAX_ATTEMPTS) {
-        _lockout();
-      } else {
-        const left = MAX_ATTEMPTS - _attempts;
-        document.getElementById('pin-error').textContent =
-          `Wrong PIN — ${left} attempt${left !== 1 ? 's' : ''} left before permanent lockout`;
-      }
-      _buf = ''; _updateDots();
-    }
   }
 
   return {
     get isAdmin() { return _on; },
-
-    removeKeyboard() { _removeKeyboardListener(); },
 
     loadFromFirebase(data) {
       if (data && data.adminPin)  _hash = data.adminPin;
@@ -1336,7 +1275,6 @@ const _admin = (() => {
     barClick() {
       if (_on) {
         _on = false;
-        _removeKeyboardListener();
         _updateAdminUI();
         showToast('Admin mode off');
       } else {
@@ -1345,9 +1283,7 @@ const _admin = (() => {
         _updateDots();
         document.getElementById('pin-error').textContent = '';
         document.querySelectorAll('.pin-key').forEach(b => b.disabled = false);
-        document.querySelector('.pin-pad') && (document.querySelector('.pin-pad').style.opacity = '1');
         document.getElementById('modal-admin-pin').style.display = '';
-        _attachKeyboardListener();
       }
     },
 
@@ -1382,7 +1318,7 @@ const _admin = (() => {
         } else {
           const left = MAX_ATTEMPTS - _attempts;
           document.getElementById('pin-error').textContent =
-            `Wrong PIN — ${left} attempt${left !== 1 ? 's' : ''} left before permanent lockout`;
+            `Wrong PIN — ${left} attempt${left !== 1 ? 's' : ''} left`;
         }
         _buf = ''; _updateDots();
       }
@@ -2393,7 +2329,6 @@ function undoLastSeason() {
 
 // ── CLOSE MODALS ──────────────────────────────────────────
 function closeModals() {
-  if (typeof _admin !== 'undefined') _admin.removeKeyboard?.();
   ['modal-add','modal-log','modal-remove','modal-delete-game','modal-admin-pin','modal-end-season','modal-start-season','modal-season-summary'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
