@@ -154,7 +154,7 @@
       showToast("⚠️ Could not load data — check your Firebase config");
     }
     // Seed legacy seasons on first load if none exist
-    if (typeof seedLegacySeasons === 'function') seedLegacySeasons();
+    if (typeof seedLegacySeasons === 'function' && seasons.length === 0) seedLegacySeasons();
     renderTable();
   };
 
@@ -693,7 +693,7 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
     </div>
 
     <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;text-align:right;padding-right:1.5rem;">
-      Version 11.1
+      Version 11.5
     </div>
 
     <div class="tabs">
@@ -2296,10 +2296,9 @@ function migrateGames(gamesList) {
 
 // ── SEED LEGACY SEASONS (S1 + S2) ─────────────────────────────────────────
 function seedLegacySeasons() {
-  // Only runs once — if seasons already has data, skip
   if (seasons.length > 0) return;
 
-  // ── Season 1 (Khaled wins, June 2026, no game logs) ──────────────────────
+  // ── Season 1 (Khaled wins, June 2026, no game logs) ──
   const s1p = [
     {id:'s1_p1',name:'Khaled', colorIdx:0},{id:'s1_p2',name:'Ayan',    colorIdx:1},
     {id:'s1_p3',name:'Abdulla',colorIdx:2},{id:'s1_p4',name:'Alex',    colorIdx:3},
@@ -2307,43 +2306,60 @@ function seedLegacySeasons() {
     {id:'s1_p7',name:'Aryan',  colorIdx:6},{id:'s1_p8',name:'Zayan',   colorIdx:7},
     {id:'s1_p9',name:'Saad',   colorIdx:8},
   ];
-  // Attach pre-computed stats directly on each player (used by getRankedFromSnapshot)
-const s1stats = {
-    's1_p1':{rank:1,gp:5, wins:4, losses:1,  totalPts:15,avgPPG:3.0,medPPG:3.0,winPct:80},
-    's1_p2':{rank:2,gp:28,wins:11,losses:17, totalPts:59,avgPPG:2.1,medPPG:2.0,winPct:39},
-    's1_p3':{rank:3,gp:18,wins:7, losses:11, totalPts:30,avgPPG:1.7,medPPG:2.0,winPct:39},
-    's1_p4':{rank:4,gp:12,wins:5, losses:7,  totalPts:29,avgPPG:2.4,medPPG:2.0,winPct:42},
-    's1_p5':{rank:5,gp:7, wins:2, losses:5,  totalPts:16,avgPPG:2.3,medPPG:2.0,winPct:29},
-    's1_p6':{rank:6,gp:31,wins:7, losses:24, totalPts:47,avgPPG:1.5,medPPG:1.0,winPct:23},
-    's1_p7':{rank:7,gp:14,wins:4, losses:10, totalPts:20,avgPPG:1.4,medPPG:1.0,winPct:29},
-    's1_p8':{rank:8,gp:1, wins:0, losses:1,  totalPts:0, avgPPG:0.0,medPPG:0.0,winPct:0},
-    's1_p9':{rank:9,gp:0, wins:0, losses:0,  totalPts:0, avgPPG:0,  medPPG:0,  winPct:null},
+  const s1stats = {
+    's1_p1':{rank:1,gp:5, wins:4,losses:1, totalPts:15,avgPPG:3.0,medPPG:3.0,winPct:80},
+    's1_p2':{rank:2,gp:28,wins:11,losses:17,totalPts:59,avgPPG:2.1,medPPG:2.0,winPct:39},
+    's1_p3':{rank:3,gp:18,wins:7,losses:11, totalPts:30,avgPPG:1.7,medPPG:2.0,winPct:39},
+    's1_p4':{rank:4,gp:12,wins:5,losses:7,  totalPts:29,avgPPG:2.4,medPPG:2.0,winPct:42},
+    's1_p5':{rank:5,gp:7, wins:2,losses:5,  totalPts:16,avgPPG:2.3,medPPG:2.0,winPct:29},
+    's1_p6':{rank:6,gp:31,wins:7,losses:24, totalPts:47,avgPPG:1.5,medPPG:1.0,winPct:23},
+    's1_p7':{rank:7,gp:14,wins:4,losses:10, totalPts:20,avgPPG:1.4,medPPG:1.0,winPct:29},
+    's1_p8':{rank:8,gp:1, wins:0,losses:1,  totalPts:0, avgPPG:0.0,medPPG:0.0,winPct:0},
+    's1_p9':{rank:9,gp:0, wins:0,losses:0,  totalPts:0, avgPPG:0,  medPPG:0,  winPct:null},
   };
   const s1pWithStats = s1p.map(p => ({ ...p, legacyStat: s1stats[p.id] }));
-  seasons.push({
-    seasonNum:1, winner:'Khaled', endDate:'June 2026',
-    players: s1pWithStats, games:[], maxedIds:[], preRanked:true,
-  });
 
-  // ── Season 2 (Aryan wins, June 2026 — snapshot from live data) ───────────
-  // We snapshot current players/games as Season 2
-  seasons.push({
-    seasonNum:2, winner:'Aryan', endDate:'June 2026',
-    players: JSON.parse(JSON.stringify(players)),
-    games:   JSON.parse(JSON.stringify(games)),
-    maxedIds:[],
-  });
+  // ── Season 2 (Aryan wins, June 2026, no game logs) ──
+  const s2p = [
+    {id:'s2_p1',name:'Aryan',  colorIdx:0},{id:'s2_p2',name:'Ayan',    colorIdx:1},
+    {id:'s2_p3',name:'Henock', colorIdx:2},{id:'s2_p4',name:'Alex',    colorIdx:3},
+    {id:'s2_p5',name:'Abdulla',colorIdx:4},{id:'s2_p6',name:'Khaled',  colorIdx:5},
+    {id:'s2_p7',name:'Laksan', colorIdx:6},{id:'s2_p8',name:'Saad',    colorIdx:7},
+    {id:'s2_p9',name:'Zayan',  colorIdx:8},
+  ];
+  const s2stats = {
+    's2_p1':{rank:1,gp:4,wins:3,losses:1,totalPts:11,avgPPG:2.75,medPPG:3.5,winPct:75},
+    's2_p2':{rank:2,gp:6,wins:4,losses:2,totalPts:14,avgPPG:2.33,medPPG:3.0,winPct:67},
+    's2_p3':{rank:3,gp:6,wins:2,losses:4,totalPts:10,avgPPG:1.67,medPPG:2.0,winPct:33},
+    's2_p4':{rank:4,gp:3,wins:1,losses:2,totalPts:4, avgPPG:1.33,medPPG:0.0,winPct:33},
+    's2_p5':{rank:5,gp:5,wins:1,losses:4,totalPts:6, avgPPG:1.2, medPPG:0.0,winPct:20},
+    's2_p6':{rank:6,gp:3,wins:1,losses:2,totalPts:3, avgPPG:1.0, medPPG:0.0,winPct:33},
+    's2_p7':{rank:7,gp:0,wins:0,losses:0,totalPts:0, avgPPG:0,   medPPG:0,  winPct:null},
+    's2_p8':{rank:8,gp:0,wins:0,losses:0,totalPts:0, avgPPG:0,   medPPG:0,  winPct:null},
+    's2_p9':{rank:9,gp:0,wins:0,losses:0,totalPts:0, avgPPG:0,   medPPG:0,  winPct:null},
+  };
+  const s2pWithStats = s2p.map(p => ({ ...p, legacyStat: s2stats[p.id] }));
 
-  // Wipe current table — Season 3 starts fresh
+  seasons = [
+    {
+      seasonNum:1, winner:'Khaled', endDate:'June 2026',
+      players: s1pWithStats, games:[], maxedIds:[], preRanked:true,
+    },
+    {
+      seasonNum:2, winner:'Aryan', endDate:'June 2026',
+      players: s2pWithStats, games:[], maxedIds:[], preRanked:true,
+    }
+  ];
+
+  // Season 3 starts fresh
   players   = [];
   games     = [];
   prevRanks = {};
 
-  // Persist to Firebase
   save();
-  console.log('Seeded Season 1 + Season 2, wiped table for Season 3');
+  console.log('Seeded Season 1 + Season 2');
 }
-
+  
 function init() {
   // firebase-ready fires during module load (synchronously after the module script)
   // By the time the inline script runs, the event has already fired.
