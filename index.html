@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
   const firebaseConfig = {
@@ -24,18 +24,6 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
   const DATA_DOC   = doc(db, "monopoly-league", "data");
-  const CONFIG_DOC = doc(db, "monopoly-league", "config");
-
-  // Load adminPin from the private config document (Firestore rules: read if false)
-  // The .catch() is intentional — rules will block public reads, which is correct.
-  // Only the Firebase SDK running in context can attempt this read.
-  window._loadAdminPin = () => getDoc(CONFIG_DOC).then(snap => {
-    if (snap.exists()) {
-      const d = snap.data();
-      if (typeof loadAdminHash === 'function') loadAdminHash({ adminPin: d.adminPin, adminSalt: d.adminSalt });
-    }
-  }).catch(() => {});
-  window._loadAdminPin();
 
   // Firestore doesn't support nested arrays, so we serialize team rankings
   // (arrays of arrays) as JSON strings before saving, and parse them on load.
@@ -1160,37 +1148,6 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
   </div>
 </div>
 
-<!-- Admin PIN Modal -->
-<div id="modal-admin-pin" style="display:none">
-  <div class="modal-bg" onclick="closeModals()">
-    <div class="modal" style="width:320px;text-align:center" onclick="event.stopPropagation()">
-      <h2>🔐 Admin login</h2>
-      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px">Enter the 4-digit PIN</p>
-      <div class="pin-dots">
-        <div class="pin-dot" id="pd0"></div>
-        <div class="pin-dot" id="pd1"></div>
-        <div class="pin-dot" id="pd2"></div>
-        <div class="pin-dot" id="pd3"></div>
-      </div>
-      <div class="pin-error" id="pin-error"></div>
-      <div class="pin-pad">
-        <button class="pin-key" onclick="pinKey('1')">1</button>
-        <button class="pin-key" onclick="pinKey('2')">2</button>
-        <button class="pin-key" onclick="pinKey('3')">3</button>
-        <button class="pin-key" onclick="pinKey('4')">4</button>
-        <button class="pin-key" onclick="pinKey('5')">5</button>
-        <button class="pin-key" onclick="pinKey('6')">6</button>
-        <button class="pin-key" onclick="pinKey('7')">7</button>
-        <button class="pin-key" onclick="pinKey('8')">8</button>
-        <button class="pin-key" onclick="pinKey('9')">9</button>
-        <button class="pin-key" onclick="pinKey('back')" style="font-size:14px">⌫</button>
-        <button class="pin-key" onclick="pinKey('0')">0</button>
-        <button class="pin-key" onclick="closeModals()" style="font-size:12px;color:var(--text-secondary)">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1236,78 +1193,39 @@ let logSelectedPlayers = [];
 let teamAssignments    = [];
 let teamRankOrder      = [];
 
-// ── ADMIN MODE ────────────────────────────────────────────
 // ── ADMIN MODE ───────────────────────────────────────────
-// Hash + salt stored in Firebase config doc — nothing sensitive in source.
-// Simple, reliable implementation: no closure, no lockout.
+const ADMIN_EMAIL = 'aryanvarma.datla@gmail.com';
+let isAdmin = false;
 
-let isAdmin   = false;
-let pinBuffer = '';
-let adminHash = null;  // SHA-256 hash loaded from Firebase
-let adminSalt = null;  // salt loaded from Firebase
+// Listen for auth state changes — fires on page load and after sign-in/out.
+// This means if you're already signed in when the page loads, admin mode
+// restores automatically without clicking anything.
+onAuthStateChanged(auth, (user) => {
+  if (user && user.email === ADMIN_EMAIL) {
+    isAdmin = true;
+  } else {
+    isAdmin = false;
+  }
+  updateAdminUI();
+});
 
-// Load hash + salt from Firebase config doc
-function loadAdminHash(data) {
-  if (data && data.adminPin)  adminHash = data.adminPin;
-  if (data && data.adminSalt) adminSalt = data.adminSalt;
-}
-
-// SHA-256 using browser built-in crypto
-async function sha256hex(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+async function adminSignIn() {
+  try {
+    await signInWithPopup(auth, provider);
+    // onAuthStateChanged above handles setting isAdmin and updating UI
+  } catch (e) {
+    if (e.code !== 'auth/popup-closed-by-user') {
+      showToast('Sign-in failed — try again');
+    }
+  }
 }
 
 function adminBarClick() {
   if (isAdmin) {
-    isAdmin = false;
-    updateAdminUI();
+    signOut(auth);
     showToast('Admin mode off');
   } else {
-    // Re-fetch from Firebase in case it wasn't loaded yet
-    if (!adminHash && window._loadAdminPin) window._loadAdminPin();
-    pinBuffer = '';
-    updatePinDots();
-    document.getElementById('pin-error').textContent = '';
-    document.getElementById('modal-admin-pin').style.display = '';
-  }
-}
-
-function pinKey(k) {
-  if (k === 'back') {
-    pinBuffer = pinBuffer.slice(0, -1);
-    updatePinDots();
-    return;
-  }
-  if (pinBuffer.length >= 4) return;
-  pinBuffer += k;
-  updatePinDots();
-  if (pinBuffer.length === 4) {
-    setTimeout(checkPin, 120);
-  }
-}
-
-async function checkPin() {
-  if (!adminHash || !adminSalt) {
-    document.getElementById('pin-error').textContent = 'PIN not configured in Firebase';
-    pinBuffer = ''; updatePinDots(); return;
-  }
-  const hashed = await sha256hex(adminSalt + pinBuffer);
-  if (hashed === adminHash) {
-    isAdmin = true;
-    closeModals();
-    updateAdminUI();
-    showToast('Admin mode on 🔑');
-  } else {
-    document.getElementById('pin-error').textContent = 'Wrong PIN — try again';
-    pinBuffer = '';
-    updatePinDots();
-  }
-}
-
-function updatePinDots() {
-  for (let i = 0; i < 4; i++) {
-    document.getElementById('pd' + i).classList.toggle('filled', i < pinBuffer.length);
+    adminSignIn();
   }
 }
 
@@ -2304,7 +2222,7 @@ function undoLastSeason() {
 
 // ── CLOSE MODALS ──────────────────────────────────────────
 function closeModals() {
-  ['modal-add','modal-log','modal-remove','modal-delete-game','modal-admin-pin','modal-end-season','modal-start-season','modal-season-summary'].forEach(id => {
+  ['modal-add','modal-log','modal-remove','modal-delete-game','modal-end-season','modal-start-season','modal-season-summary'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
 }
