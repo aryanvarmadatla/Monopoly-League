@@ -23,6 +23,11 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
+  window._auth = auth;
+  window._provider = provider;
+  window._signInWithPopup = signInWithPopup;
+  window._signOut = signOut;
+  window._onAuthStateChanged = onAuthStateChanged;
   const DATA_DOC   = doc(db, "monopoly-league", "data");
 
   // Firestore doesn't support nested arrays, so we serialize team rankings
@@ -673,7 +678,7 @@ tr.maxed-row:hover { background: rgba(22,163,74,0.15) !important; }
     </div>
 
     <div style="font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.03em;text-align:right;padding-right:1.5rem;">
-      Version 10.5
+      Version 10.67
     </div>
 
     <div class="tabs">
@@ -1197,10 +1202,7 @@ let teamRankOrder      = [];
 const ADMIN_EMAIL = 'aryanvarma.datla@gmail.com';
 let isAdmin = false;
 
-// Listen for auth state changes — fires on page load and after sign-in/out.
-// This means if you're already signed in when the page loads, admin mode
-// restores automatically without clicking anything.
-onAuthStateChanged(auth, (user) => {
+window._onAuthStateChanged(window._auth, (user) => {
   if (user && user.email === ADMIN_EMAIL) {
     isAdmin = true;
   } else {
@@ -1211,8 +1213,7 @@ onAuthStateChanged(auth, (user) => {
 
 async function adminSignIn() {
   try {
-    await signInWithPopup(auth, provider);
-    // onAuthStateChanged above handles setting isAdmin and updating UI
+    await window._signInWithPopup(window._auth, window._provider);
   } catch (e) {
     if (e.code !== 'auth/popup-closed-by-user') {
       showToast('Sign-in failed — try again');
@@ -1222,13 +1223,13 @@ async function adminSignIn() {
 
 function adminBarClick() {
   if (isAdmin) {
-    signOut(auth);
+    window._signOut(window._auth);
     showToast('Admin mode off');
   } else {
     adminSignIn();
   }
 }
-
+  
 function updateAdminUI() {
   const bar    = document.getElementById('admin-bar');
   const label  = document.getElementById('admin-bar-label');
